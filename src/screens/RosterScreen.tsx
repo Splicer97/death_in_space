@@ -173,7 +173,10 @@ export default function RosterScreen({ navigation }: Props) {
             accessibilityRole="button"
             accessibilityLabel="Данные и резервные копии"
             onPress={() => navigation.navigate('Data')}
-            style={({pressed}) => [styles.dataButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.dataButton,
+              pressed && styles.pressed,
+            ]}
           >
             <Text style={styles.dataButtonText}>⇅</Text>
           </Pressable>
@@ -195,7 +198,7 @@ export default function RosterScreen({ navigation }: Props) {
             variant="ghost"
             singleLine
             onPress={() => navigation.navigate('Hub')}
-            style={styles.headerButton}
+            style={[styles.headerButton, styles.headerTab]}
             textStyle={styles.tabText}
           />
           <Button
@@ -203,7 +206,7 @@ export default function RosterScreen({ navigation }: Props) {
             variant="ghost"
             singleLine
             onPress={() => navigation.navigate('Tables')}
-            style={styles.headerButton}
+            style={[styles.headerButton, styles.headerTab]}
             textStyle={styles.tabText}
           />
           <Button
@@ -230,7 +233,7 @@ export default function RosterScreen({ navigation }: Props) {
         ListEmptyComponent={
           <Empty
             glyph="☠️"
-            text="Персонажей пока нет.\nНажмите «+ ПЕРСОНАЖ», чтобы бросить кости."
+            text={'Персонажей пока нет.\nНажмите «+ ПЕРСОНАЖ», чтобы бросить кости.'}
           />
         }
       />
@@ -238,9 +241,7 @@ export default function RosterScreen({ navigation }: Props) {
       <Snackbar
         visible={undoCharacter !== null}
         message={
-          undoCharacter
-            ? `«${undoCharacter.name || 'Без имени'}» удалён`
-            : ''
+          undoCharacter ? `«${undoCharacter.name || 'Без имени'}» удалён` : ''
         }
         actionLabel="ОТМЕНИТЬ"
         onAction={() => undoRemove()}
@@ -325,6 +326,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     paddingHorizontal: spacing.xs,
   },
+  headerTab: { borderColor: colors.text },
   tabText: { fontSize: font.small, letterSpacing: 0.4 },
   card: {
     backgroundColor: colors.surface,
@@ -345,7 +347,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  dataButtonText: {color: colors.yellow, fontSize: 18, fontWeight: '800'},
+  dataButtonText: { color: colors.yellow, fontSize: 18, fontWeight: '800' },
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
     width: 52,
