@@ -168,6 +168,14 @@ export default function RosterScreen({ navigation }: Props) {
             <Text style={styles.title}>СМЕРТЬ В КОСМОСЕ</Text>
             <Text style={styles.subtitle}>ЛИСТ ПЕРСОНАЛЬНЫХ ДАННЫХ</Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Данные и резервные копии"
+            onPress={() => navigation.navigate('Data')}
+            style={({pressed}) => [styles.dataButton, pressed && styles.pressed]}
+          >
+            <Text style={styles.dataButtonText}>⇅</Text>
+          </Pressable>
         </View>
         <Text style={styles.hint}>
           Долгое нажатие на карточке открывает удаление персонажа
@@ -305,6 +313,16 @@ const styles = StyleSheet.create({
     ...shadow.card,
   },
   pressed: { opacity: 0.7 },
+  dataButton: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dataButtonText: {color: colors.yellow, fontSize: 18, fontWeight: '800'},
   cardTop: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
     width: 52,

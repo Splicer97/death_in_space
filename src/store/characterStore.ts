@@ -76,6 +76,11 @@ export interface CharacterStore {
   createHub: (draft: HubDraft) => void;
   updateHub: (patch: Partial<Hub>) => void;
   removeHub: () => void;
+  importBackup: (payload: {
+    characters: Character[];
+    activeId: string | null;
+    hub: Hub | null;
+  }) => void;
 }
 
 export function createCharacterStore() {
@@ -178,6 +183,15 @@ export function createCharacterStore() {
 
         removeHub: () =>
           set(state => ({ hub: null, undoHub: state.hub, undoCharacter: null })),
+
+        importBackup: payload =>
+          set({
+            characters: payload.characters,
+            activeId: payload.activeId,
+            hub: payload.hub,
+            undoCharacter: null,
+            undoHub: null,
+          }),
       }),
       {
         name: 'characters',

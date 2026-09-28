@@ -1,19 +1,22 @@
 import React from 'react';
-import { Alert } from 'react-native';
+import { Alert, Share } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import CreateScreen from '../src/screens/CreateScreen';
 import CharacterScreen from '../src/screens/CharacterScreen';
+import DataScreen from '../src/screens/DataScreen';
 import RosterScreen from '../src/screens/RosterScreen';
 import { emptyCharacter, useCharacterStore } from '../src/store/characterStore';
 import { TRAITS } from '../src/data/tables';
+import { STARTING_HUBS } from '../src/types';
 import { storage } from '../src/store/storage';
 import type { RootStackParamList } from '../src/navigation/types';
 
 type CreateProps = NativeStackScreenProps<RootStackParamList, 'Create'>;
 type CharacterProps = NativeStackScreenProps<RootStackParamList, 'Character'>;
 type RosterProps = NativeStackScreenProps<RootStackParamList, 'Roster'>;
+type DataProps = NativeStackScreenProps<RootStackParamList, 'Data'>;
 
 type NavMock = {
   navigate: jest.Mock;
@@ -404,5 +407,102 @@ describe('character sheet', () => {
     });
 
     expect(JSON.stringify(tree.toJSON())).toContain('Персонаж не найден');
+  });
+});
+
+describe('backup screen', () => {
+  beforeEach(() => {
+    storage.clearAll();
+    act(() => {
+      useCharacterStore.setState({
+        characters: [],
+        activeId: null,
+        hub: null,
+        undoCharacter: null,
+        undoHub: null,
+      });
+    });
+  });
+
+  function renderData() {
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <DataScreen
+          navigation={makeNav<DataProps['navigation']>().nav}
+          route={{ key: 'd', name: 'Data' }}
+        />,
+      );
+    });
+    return tree;
+  }
+
+  function paste(tree: TestRenderer.ReactTestRenderer, value: string) {
+    const input = tree.root.findAll(
+      node => typeof node.type === 'string' && node.props.multiline,
+    )[0];
+    act(() => {
+      input.props.onChangeText(value);
+    });
+  }
+
+  it('shares a copy of the roster and the hub', () => {
+    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Вейн'});
+    useCharacterStore.getState().createHub({
+      ...STARTING_HUBS.starship,
+      hull: 'Кольцо Рас',
+    });
+    const shareSpy = jest
+      .spyOn(Share, 'share')
+      .mockResolvedValue({action: 'sharedAction', activityType: undefined});
+
+    const tree = renderData();
+    press(tree.root, 'ПОДЕЛИТЬСЯ КОПИЕЙ');
+
+    const parsed = JSON.parse(shareSpy.mock.calls[0][0].message as string);
+    expect(parsed.app).toBe('death-in-space');
+    expect(parsed.characters[0].name).toBe('Вейн');
+    expect(parsed.hub.hull).toBe('Кольцо Рас');
+    shareSpy.mockRestore();
+  });
+
+  it('complains about a broken paste and keeps the current data', () => {
+    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Вейн'});
+    const tree = renderData();
+
+    paste(tree, 'привет');
+
+    expect(collectText(tree.root)).toContain('Это не JSON');
+    expect(useCharacterStore.getState().characters[0].name).toBe('Вейн');
+  });
+
+  it('previews the copy and replaces the data only after a confirmation', () => {
+    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Лишний'});
+    const backup = JSON.stringify({
+      app: 'death-in-space',
+      version: 1,
+      characters: [{id: 'x', name: 'Вейн'}],
+      hub: {type: 'station', hull: 'Тихая гавань'},
+    });
+
+    const tree = renderData();
+    paste(tree, backup);
+    expect(collectText(tree.root)).toContain('В копии: 1 персонаж, хаб «Тихая гавань»');
+
+    const alertSpy = jest.spyOn(Alert, 'alert');
+    press(tree.root, 'ИМПОРТИРОВАТЬ');
+    expect(useCharacterStore.getState().characters[0].name).toBe('Лишний');
+
+    const buttons = alertSpy.mock.calls[0][2] ?? [];
+    act(() => {
+      buttons.find(button => button.style === 'destructive')?.onPress?.();
+    });
+
+    const state = useCharacterStore.getState();
+    expect(state.characters).toHaveLength(1);
+    expect(state.characters[0].name).toBe('Вейн');
+    expect(state.hub?.hull).toBe('Тихая гавань');
+    expect(collectText(tree.root)).toContain('Импортировано: 1 персонаж');
+    alertSpy.mockRestore();
   });
 });

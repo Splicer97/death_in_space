@@ -8,6 +8,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import CharacterScreen from '../screens/CharacterScreen';
 import CreateScreen from '../screens/CreateScreen';
+import DataScreen from '../screens/DataScreen';
 import HubScreen from '../screens/HubScreen';
 import RollScreen from '../screens/RollScreen';
 import RosterScreen from '../screens/RosterScreen';
@@ -70,6 +71,11 @@ export default function RootNavigator() {
           name="Hub"
           component={HubScreen}
           options={{ title: 'ХАБ' }}
+        />
+        <Stack.Screen
+          name="Data"
+          component={DataScreen}
+          options={{ title: 'ДАННЫЕ И КОПИИ' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

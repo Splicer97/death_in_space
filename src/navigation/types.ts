@@ -5,4 +5,5 @@ export type RootStackParamList = {
   Tables: undefined;
   Roll: { id: string };
   Hub: undefined;
+  Data: undefined;
 };
