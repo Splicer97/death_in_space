@@ -193,19 +193,25 @@ export default function RosterScreen({ navigation }: Props) {
           <Button
             title="ХАБ"
             variant="ghost"
+            singleLine
             onPress={() => navigation.navigate('Hub')}
             style={styles.headerButton}
+            textStyle={styles.tabText}
           />
           <Button
             title="ТАБЛИЦЫ"
             variant="ghost"
+            singleLine
             onPress={() => navigation.navigate('Tables')}
             style={styles.headerButton}
+            textStyle={styles.tabText}
           />
           <Button
             title="+ ПЕРСОНАЖ"
+            singleLine
             onPress={() => navigation.navigate('Create')}
             style={styles.headerButton}
+            textStyle={styles.tabText}
           />
         </View>
       </View>
@@ -313,7 +319,13 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
   },
   headerActions: { flexDirection: 'row' },
-  headerButton: { flex: 1, marginRight: spacing.sm },
+  headerButton: {
+    flex: 1,
+    marginRight: spacing.sm,
+    borderWidth: 2,
+    paddingHorizontal: spacing.xs,
+  },
+  tabText: { fontSize: font.small, letterSpacing: 0.4 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,

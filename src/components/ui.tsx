@@ -205,12 +205,16 @@ export function Button({
   variant = 'primary',
   disabled,
   style,
+  textStyle,
+  singleLine,
 }: {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'ghost' | 'danger';
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  singleLine?: boolean;
 }) {
   return (
     <Pressable
@@ -228,10 +232,12 @@ export function Button({
       ]}
     >
       <Text
+        numberOfLines={singleLine ? 1 : undefined}
         style={[
           styles.buttonText,
           variant === 'ghost' && styles.buttonTextGhost,
           variant === 'danger' && styles.buttonTextDanger,
+          textStyle,
         ]}
       >
         {title}
