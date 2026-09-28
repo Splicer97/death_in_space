@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Button, Empty, Screen, Snackbar } from '../components/ui';
+import { Button, Empty, Ornament, Screen, Snackbar } from '../components/ui';
 import { useCharacterStore } from '../store/characterStore';
 import {
   ABILITY_COLORS,
@@ -162,6 +162,7 @@ export default function RosterScreen({ navigation }: Props) {
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <View style={styles.titleMark}>
+            <View style={styles.titleMarkHalo} />
             <Text style={styles.titleMarkText}>☠</Text>
           </View>
           <View style={styles.flex}>
@@ -177,6 +178,7 @@ export default function RosterScreen({ navigation }: Props) {
             <Text style={styles.dataButtonText}>⇅</Text>
           </Pressable>
         </View>
+        <Ornament glyphs={['✦', '⌬', '✶']} color={colors.yellowDim} />
         <Text style={styles.hint}>
           Долгое нажатие на карточке открывает удаление персонажа
         </Text>
@@ -264,6 +266,15 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   header: { marginBottom: spacing.lg },
   titleRow: { flexDirection: 'row', alignItems: 'center' },
+  titleMarkHalo: {
+    position: 'absolute',
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    borderWidth: 1,
+    borderColor: colors.yellowDim,
+    opacity: 0.3,
+  },
   titleMark: {
     width: 46,
     height: 46,

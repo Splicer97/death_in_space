@@ -208,7 +208,10 @@ export default function HubScreen({ navigation }: Props) {
       <Screen>
         <ScrollView contentContainerStyle={styles.content}>
           <Card>
-            <Empty text="Хаба пока нет. Это дом команды: звездолёт или станция с модулями, топливом и историей." />
+            <Empty
+              glyph="⟁"
+              text="Хаба пока нет. Это дом команды: звездолёт или станция с модулями, топливом и историей."
+            />
             <Button
               title="СОЗДАТЬ ХАБ"
               onPress={() => {

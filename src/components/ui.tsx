@@ -12,6 +12,7 @@ import {
 
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
+import { Starfield } from './Starfield';
 import { colors, font, radius, shadow, spacing, type } from '../theme';
 
 const FALLBACK_INSETS = { top: 0, bottom: 0, left: 0, right: 0 };
@@ -35,7 +36,28 @@ export function Screen({
         style,
       ]}
     >
+      <Starfield />
       {children}
+    </View>
+  );
+}
+
+export function Ornament({
+  glyphs = ['✦', '⌬', '✶'],
+  color = colors.textFaint,
+  style,
+}: {
+  glyphs?: string[];
+  color?: string;
+  style?: StyleProp<TextStyle>;
+}) {
+  return (
+    <View style={styles.ornament}>
+      <View style={styles.ornamentRule} />
+      <Text style={[styles.ornamentText, {color}, style]}>
+        {glyphs.join(' ')}
+      </Text>
+      <View style={styles.ornamentRule} />
     </View>
   );
 }
@@ -306,9 +328,11 @@ export function Empty({
   return (
     <View style={styles.empty}>
       <View style={styles.emptyGlyph}>
+        <View style={styles.emptyHalo} />
         <Text style={styles.emptyGlyphText}>{glyph}</Text>
       </View>
       <Text style={styles.emptyText}>{text}</Text>
+      <Ornament glyphs={['✦', '⌬']} />
     </View>
   );
 }
@@ -401,6 +425,21 @@ export function Snackbar({
 export const styles = StyleSheet.create({
   flex: { flex: 1 },
   screen: { flex: 1, backgroundColor: colors.bg },
+  ornament: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginVertical: spacing.sm,
+  },
+  ornamentRule: {
+    flex: 1,
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border,
+  },
+  ornamentText: {
+    fontSize: font.tiny,
+    letterSpacing: 2,
+  },
   card: {
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
@@ -634,6 +673,15 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
+  },
+  emptyHalo: {
+    position: 'absolute',
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    borderWidth: 1,
+    borderColor: colors.yellowDim,
+    opacity: 0.35,
   },
   emptyGlyphText: { fontSize: 40 },
   emptyText: {
