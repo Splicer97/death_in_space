@@ -208,6 +208,32 @@ describe('character creation flow', () => {
 
     expect(useCharacterStore.getState().characters).toHaveLength(0);
   });
+
+  it('clamps starting hit points to 11 (1d8 + +3 bonus)', () => {
+    const { nav } = makeNav<CreateProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CreateScreen navigation={nav} route={{ key: 'k', name: 'Create' }} />,
+      );
+    });
+
+    for (let i = 0; i < 4; i += 1) {
+      press(tree.root, 'ДАЛЬШЕ');
+    }
+
+    const up = findByLabel(tree.root, 'Увеличить МАКСИМУМ ХИТОВ');
+    for (let i = 0; i < 13; i += 1) {
+      act(() => up.props.onPress());
+    }
+
+    const rendered = (value: string) =>
+      tree.root.findAll(
+        node => node.props?.children === value && typeof node.type === 'string',
+      );
+    expect(rendered('+11')).not.toHaveLength(0);
+    expect(rendered('+12')).toHaveLength(0);
+  });
 });
 
 describe('character sheet', () => {

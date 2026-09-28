@@ -425,18 +425,19 @@ export default function CreateScreen({ navigation }: Props) {
             <SectionTitle
               index="ШАГ 5"
               title="ХИТЫ И ЗАЩИТА"
-              subtitle="Максимум хитов 1d8 · защита 12+ЛОВ · лечение 1d8+ТЕЛ"
+              subtitle="Максимум хитов 1d8 · стартовый бонус +3 ОЗ · защита 12+ЛОВ · лечение 1d8+ТЕЛ"
             />
             <NumberStepper
               label="МАКСИМУМ ХИТОВ"
               value={draft.hpMax}
               onChange={value => patch({ hpMax: value, hp: value })}
               min={1}
-              max={40}
+              max={11}
               big
             />
             <Text style={styles.help}>
-              Если не бросать кубик, лист стартует с {DEFAULT_HP} хитами.
+              Если не бросать кубик, лист стартует с {DEFAULT_HP} хитами. Хиты
+              из стартового бонуса «+3 к ОЗ» прибавьте сами — итого до 11.
             </Text>
             <Button
               title="БРОСИТЬ 1d8"
