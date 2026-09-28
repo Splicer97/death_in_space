@@ -259,15 +259,11 @@ export default function CreateScreen({ navigation }: Props) {
                     return (
                       <Pressable
                         key={benefit.name}
-                        accessibilityRole="button"
+                        accessibilityRole="radio"
                         accessibilityState={{ selected: active }}
                         onPress={() =>
                           patch({
-                            originBenefits: active
-                              ? draft.originBenefits.filter(
-                                  name => name !== benefit.name,
-                                )
-                              : [...draft.originBenefits, benefit.name],
+                            originBenefits: active ? [] : [benefit.name],
                           })
                         }
                         style={[styles.benefit, active && styles.benefitActive]}

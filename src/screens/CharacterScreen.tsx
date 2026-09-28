@@ -319,14 +319,11 @@ export default function CharacterScreen({ navigation, route }: Props) {
                     return (
                       <Pressable
                         key={benefit.name}
-                        accessibilityRole="button"
+                        accessibilityRole="radio"
+                        accessibilityState={{ selected: active }}
                         onPress={() =>
                           set({
-                            originBenefits: active
-                              ? character.originBenefits.filter(
-                                  item => item !== benefit.name,
-                                )
-                              : [...character.originBenefits, benefit.name],
+                            originBenefits: active ? [] : [benefit.name],
                           })
                         }
                         style={[styles.benefit, active && styles.benefitActive]}

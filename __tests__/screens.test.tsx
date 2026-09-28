@@ -157,6 +157,7 @@ describe('character creation flow', () => {
     press(tree.root, 'ДАЛЬШЕ');
     press(tree.root, 'КАРБОН');
     press(tree.root, 'ШЕСТЕРЁНКОГОЛОВЫЙ');
+    press(tree.root, 'ИСКУССТВЕННЫЕ ЛЕГКИЕ');
     press(tree.root, 'ДАЛЬШЕ');
 
     // Step 3: details.
@@ -181,7 +182,7 @@ describe('character creation flow', () => {
     expect(state.characters).toHaveLength(1);
     expect(state.characters[0].name).toBe('Вейн');
     expect(state.characters[0].origin).toBe('carbon');
-    expect(state.characters[0].originBenefits).toEqual(['ШЕСТЕРЁНКОГОЛОВЫЙ']);
+    expect(state.characters[0].originBenefits).toEqual(['ИСКУССТВЕННЫЕ ЛЕГКИЕ']);
     expect(state.characters[0].holos).toBeGreaterThanOrEqual(3);
     expect(calls.replace).toHaveBeenCalledWith('Character', {
       id: state.characters[0].id,
