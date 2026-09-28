@@ -317,6 +317,87 @@ export function Hint({ text }: { text: string }) {
   return <Text style={styles.hint}>{text}</Text>;
 }
 
+export function SearchInput({
+  value,
+  onChangeText,
+  placeholder = 'Поиск',
+  accessibilityLabel = 'Поиск',
+}: {
+  value: string;
+  onChangeText: (value: string) => void;
+  placeholder?: string;
+  accessibilityLabel?: string;
+}) {
+  return (
+    <View style={styles.search}>
+      <Text style={styles.searchIcon}>⌕</Text>
+      <TextInput
+        style={styles.searchInput}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={colors.textFaint}
+        accessibilityLabel={accessibilityLabel}
+        autoCorrect={false}
+        returnKeyType="search"
+      />
+      {value ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Очистить поиск"
+          onPress={() => onChangeText('')}
+          style={styles.searchClear}
+        >
+          <Text style={styles.searchClearText}>✕</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+export function Snackbar({
+  message,
+  actionLabel,
+  onAction,
+  onDismiss,
+  visible,
+}: {
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+  onDismiss?: () => void;
+  visible: boolean;
+}) {
+  if (!visible) {
+    return null;
+  }
+  return (
+    <View style={styles.snackbar} pointerEvents="box-none">
+      <View style={styles.snackbarBox}>
+        <Text style={styles.snackbarText}>{message}</Text>
+        {actionLabel && onAction ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={actionLabel}
+            onPress={onAction}
+          >
+            <Text style={styles.snackbarAction}>{actionLabel}</Text>
+          </Pressable>
+        ) : null}
+        {onDismiss ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Закрыть"
+            onPress={onDismiss}
+          >
+            <Text style={styles.snackbarClose}>✕</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
 export const styles = StyleSheet.create({
   flex: { flex: 1 },
   screen: { flex: 1, backgroundColor: colors.bg },
@@ -498,6 +579,51 @@ export const styles = StyleSheet.create({
     marginVertical: spacing.md,
   },
   empty: { alignItems: 'center', paddingVertical: spacing.xxl },
+  search: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceAlt,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  searchIcon: {color: colors.textFaint, fontSize: 16, marginRight: spacing.xs},
+  searchInput: {
+    flex: 1,
+    color: colors.text,
+    fontSize: font.small,
+    paddingVertical: spacing.sm,
+  },
+  searchClear: {paddingHorizontal: spacing.xs},
+  searchClearText: {color: colors.textFaint, fontSize: font.small},
+  snackbar: {
+    position: 'absolute',
+    left: spacing.lg,
+    right: spacing.lg,
+    bottom: spacing.lg,
+  },
+  snackbarBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceHi,
+    borderWidth: 1,
+    borderColor: colors.yellowDim,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    ...shadow.card,
+  },
+  snackbarText: {flex: 1, color: colors.text, fontSize: font.small},
+  snackbarAction: {
+    color: colors.yellow,
+    fontSize: font.small,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    paddingHorizontal: spacing.sm,
+  },
+  snackbarClose: {color: colors.textFaint, fontSize: font.small},
   emptyGlyph: {
     width: 96,
     height: 96,

@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   View,
@@ -14,10 +15,13 @@ import {
   Button,
   Card,
   Divider,
+  Empty,
   Field,
   NumberStepper,
   Screen,
+  SearchInput,
   SectionTitle,
+  Snackbar,
   Tag,
 } from '../components/ui';
 import {
@@ -42,6 +46,7 @@ import {
 } from '../types';
 import type { TableEntry } from '../data/tables';
 import { rollDie } from '../utils/dice';
+import { hubToText } from '../utils/sheetText';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Hub'>;
@@ -87,8 +92,11 @@ export default function HubScreen({ navigation }: Props) {
   const createHub = useCharacterStore(state => state.createHub);
   const updateHub = useCharacterStore(state => state.updateHub);
   const removeHub = useCharacterStore(state => state.removeHub);
+  const undoHub = useCharacterStore(state => state.undoHub);
+  const undoRemove = useCharacterStore(state => state.undoRemove);
+  const clearUndo = useCharacterStore(state => state.clearUndo);
 
-  const [creating, setCreating] = useState(!hub);
+  const [creating, setCreating] = useState(false);
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<HubDraft>({
     ...STARTING_HUBS.starship,
@@ -105,7 +113,7 @@ export default function HubScreen({ navigation }: Props) {
     setDraft(current => ({ ...current, ...value }));
   }, []);
 
-  const pickType = useCallback((type: HubType) => {
+  const applyType = useCallback((type: HubType) => {
     setDraft(current => {
       const base = STARTING_HUBS[type];
       // корпус и стартовые характеристики сохраняем, если хаб уже был в игре
@@ -117,9 +125,53 @@ export default function HubScreen({ navigation }: Props) {
         fuelMax: current.fuelMax,
         energyOutput: base.energyOutput,
         fuel: base.fuel,
+        modules: [],
       };
     });
   }, []);
+
+  const requestType = useCallback(
+    (type: HubType) => {
+      if (type === draft.type) {
+        return;
+      }
+      const from = draft.type === 'starship' ? 'звездолёта' : 'станции';
+      const to = type === 'starship' ? 'звездолёта' : 'станции';
+      const hasModules = draft.modules.length > 0;
+      const hasCustomHull = draft.hull !== STARTING_HUBS[draft.type].hull;
+
+      if (!hasModules && !hasCustomHull) {
+        applyType(type);
+        return;
+      }
+
+      Alert.alert(
+        `Сменить тип на ${to}?`,
+        `Уровень защиты, состояние, запас топлива и выходная мощность будут взяты от ${from}, а установленные модули сбросятся. Название хаба сохранится.`,
+        [
+          { text: 'Отмена', style: 'cancel' },
+          { text: 'Сменить', style: 'destructive', onPress: () => applyType(type) },
+        ],
+      );
+    },
+    [applyType, draft],
+  );
+
+  useEffect(
+    () =>
+      navigation.addListener('beforeRemove', event => {
+        if (step > 0) {
+          event.preventDefault();
+          setStep(current => current - 1);
+          return;
+        }
+        if (creating && !hub) {
+          event.preventDefault();
+          setCreating(false);
+        }
+      }),
+    [creating, hub, navigation, step],
+  );
 
   const finish = useCallback(() => {
     createHub(draft);
@@ -146,6 +198,43 @@ export default function HubScreen({ navigation }: Props) {
     );
   }, [removeHub]);
 
+  const restoreHub = useCallback(() => {
+    undoRemove();
+    setCreating(false);
+  }, [undoRemove]);
+
+  if (!hub && !creating) {
+    return (
+      <Screen>
+        <ScrollView contentContainerStyle={styles.content}>
+          <Card>
+            <Empty text="Хаба пока нет. Это дом команды: звездолёт или станция с модулями, топливом и историей." />
+            <Button
+              title="СОЗДАТЬ ХАБ"
+              onPress={() => {
+                setDraft({ ...STARTING_HUBS.starship });
+                setStep(0);
+                setCreating(true);
+              }}
+            />
+            <View style={styles.spacer} />
+            <Text style={styles.help}>
+              Подсказка: у хаба есть выходная мощность, за счёт которой держатся
+              модули. Без модулей команда просто живёт и перелетает.
+            </Text>
+          </Card>
+        </ScrollView>
+        <Snackbar
+          visible={undoHub !== null}
+          message="Хаб удалён"
+          actionLabel="ОТМЕНИТЬ"
+          onAction={restoreHub}
+          onDismiss={() => clearUndo()}
+        />
+      </Screen>
+    );
+  }
+
   if (creating || !hub) {
     return (
       <Screen>
@@ -168,7 +257,7 @@ export default function HubScreen({ navigation }: Props) {
                       key={type}
                       accessibilityRole="button"
                       accessibilityState={{ selected: draft.type === type }}
-                      onPress={() => pickType(type)}
+                      onPress={() => requestType(type)}
                       style={[
                         styles.typeCard,
                         draft.type === type && styles.typeCardActive,
@@ -430,7 +519,13 @@ export default function HubScreen({ navigation }: Props) {
           <Button
             title="НАЗАД"
             variant="ghost"
-            onPress={() => (step === 0 ? navigation.goBack() : setStep(step - 1))}
+            onPress={() =>
+              step === 0
+                ? hub
+                  ? navigation.goBack()
+                  : setCreating(false)
+                : setStep(step - 1)
+            }
             style={styles.footerButton}
           />
           {step < STEPS.length - 1 ? (
@@ -458,6 +553,14 @@ export default function HubScreen({ navigation }: Props) {
             onClose={() => setPicker(null)}
           />
         ) : null}
+
+        <Snackbar
+          visible={undoHub !== null}
+          message="Хаб удалён"
+          actionLabel="ОТМЕНИТЬ"
+          onAction={restoreHub}
+          onDismiss={() => clearUndo()}
+        />
       </Screen>
     );
   }
@@ -487,6 +590,12 @@ export default function HubScreen({ navigation }: Props) {
         setCreating(true);
       }}
       onReset={reset}
+      onShare={() => {
+        Share.share({
+          title: hub.hull || 'Лист хаба',
+          message: hubToText(hub),
+        }).catch(() => undefined);
+      }}
     />
   );
 }
@@ -509,15 +618,18 @@ function HubSheet({
   update,
   onEdit,
   onReset,
+  onShare,
 }: {
   hub: Hub;
   update: (patch: Partial<Hub>) => void;
   onEdit: () => void;
   onReset: () => void;
+  onShare: () => void;
 }) {
   const [moduleTab, setModuleTab] = useState<keyof typeof HUB_MODULES>(
     'general',
   );
+  const [query, setQuery] = useState('');
   const [picker, setPicker] = useState<{
     title: string;
     die: string;
@@ -549,6 +661,18 @@ function HubSheet({
 
   const installed = useMemo(() => new Set(hub.modules.map(m => m.name)), [hub.modules]);
 
+  const visibleModules = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) {
+      return modules;
+    }
+    return modules.filter(
+      item =>
+        item.name.toLowerCase().includes(needle) ||
+        item.description.toLowerCase().includes(needle),
+    );
+  }, [modules, query]);
+
   return (
     <Screen>
       <ScrollView
@@ -569,14 +693,24 @@ function HubSheet({
                 {hub.energySource}
               </Text>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Пересоздать хаб"
-              onPress={onEdit}
-              style={styles.headButton}
-            >
-              <Text style={styles.headButtonText}>ИЗМЕНИТЬ</Text>
-            </Pressable>
+            <View style={styles.headActions}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Поделиться листом хаба"
+                onPress={onShare}
+                style={styles.headIconButton}
+              >
+                <Text style={styles.headIconText}>⤴</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Пересоздать хаб"
+                onPress={onEdit}
+                style={styles.headButton}
+              >
+                <Text style={styles.headButtonText}>ИЗМЕНИТЬ</Text>
+              </Pressable>
+            </View>
           </View>
           <View style={styles.statGrid}>
             <HubStat label="УЗ" value={String(hub.defenseRating)} />
@@ -692,8 +826,19 @@ function HubSheet({
               </Pressable>
             ))}
           </View>
+          <SearchInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Поиск модуля"
+            accessibilityLabel="Поиск модуля"
+          />
           <Text style={styles.subLabel}>{group?.subtitle}</Text>
-          {modules.map(item => {
+          {visibleModules.length === 0 ? (
+            <Text style={styles.help}>
+              Ничего не найдено. Попробуйте другое слово или сбросьте поиск.
+            </Text>
+          ) : null}
+          {visibleModules.map(item => {
             const isInstalled = installed.has(item.name);
             const fits = used + item.energy <= hub.energyOutput;
             return (
@@ -961,6 +1106,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
+  headActions: {flexDirection: 'row', alignItems: 'center'},
+  headIconButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    marginRight: spacing.xs,
+  },
+  headIconText: {color: colors.textDim, fontSize: font.body},
+  spacer: {height: spacing.md},
   headButtonText: {
     color: colors.textDim,
     fontSize: 10,

@@ -3,6 +3,7 @@ import {
   Alert,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -52,6 +53,7 @@ import {
   type Item,
 } from '../types';
 import { rollDie } from '../utils/dice';
+import { characterToText } from '../utils/sheetText';
 import type { RootStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Character'>;
@@ -62,8 +64,19 @@ export default function CharacterScreen({ navigation, route }: Props) {
   const { id } = route.params;
   const character = useCharacterStore(selectCharacter(id));
   const updateCharacter = useCharacterStore(state => state.updateCharacter);
+  const removeCharacter = useCharacterStore(state => state.removeCharacter);
   const [tab, setTab] = useState<0 | 1 | 2>(0);
   const [showMutations, setShowMutations] = useState(false);
+
+  const share = useCallback(() => {
+    if (!character) {
+      return;
+    }
+    Share.share({
+      title: character.name || 'Лист персонажа',
+      message: characterToText(character),
+    }).catch(() => undefined);
+  }, [character]);
 
   const set = useCallback(
     (patch: Partial<Character>) => {
@@ -110,14 +123,24 @@ export default function CharacterScreen({ navigation, route }: Props) {
               {character.nickname ? ` · «${character.nickname}»` : ''}
             </Text>
           </View>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Открыть броски"
-            onPress={() => navigation.navigate('Roll', { id })}
-            style={styles.rollButton}
-          >
-            <Text style={styles.rollButtonText}>d20</Text>
-          </Pressable>
+          <View style={styles.headerButtons}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Поделиться листом"
+              onPress={share}
+              style={styles.shareButton}
+            >
+              <Text style={styles.shareButtonText}>⤴</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Открыть броски"
+              onPress={() => navigation.navigate('Roll', { id })}
+              style={styles.rollButton}
+            >
+              <Text style={styles.rollButtonText}>d20</Text>
+            </Pressable>
+          </View>
         </View>
         <View style={styles.headerStats}>
           <HeadStat
@@ -809,6 +832,28 @@ export default function CharacterScreen({ navigation, route }: Props) {
               />
             </Card>
             <Button
+              title="УДАЛИТЬ ПЕРСОНАЖА"
+              variant="danger"
+              onPress={() =>
+                Alert.alert(
+                  'Удалить персонажа?',
+                  `${character.name || 'Без имени'} будет удалён из ростера.`,
+                  [
+                    { text: 'Отмена', style: 'cancel' },
+                    {
+                      text: 'Удалить',
+                      style: 'destructive',
+                      onPress: () => {
+                        removeCharacter(character.id);
+                        navigation.goBack();
+                      },
+                    },
+                  ],
+                )
+              }
+            />
+            <View style={styles.spacer} />
+            <Button
               title="ОЧИСТИТЬ ВСЁ"
               variant="danger"
               onPress={() =>
@@ -997,6 +1042,17 @@ const styles = StyleSheet.create({
     fontSize: font.body,
     fontWeight: '800',
   },
+  headerButtons: {flexDirection: 'row', alignItems: 'center'},
+  spacer: {height: spacing.sm},
+  shareButton: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginRight: spacing.sm,
+  },
+  shareButtonText: {color: colors.textDim, fontSize: font.body},
   headerStats: {
     flexDirection: 'row',
     marginTop: spacing.md,

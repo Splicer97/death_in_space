@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Button, Empty, Screen } from '../components/ui';
+import { Button, Empty, Screen, Snackbar } from '../components/ui';
 import { useCharacterStore } from '../store/characterStore';
 import {
   ABILITY_COLORS,
@@ -37,6 +37,9 @@ export default function RosterScreen({ navigation }: Props) {
   const characters = useCharacterStore(state => state.characters);
   const removeCharacter = useCharacterStore(state => state.removeCharacter);
   const setActive = useCharacterStore(state => state.setActive);
+  const undoCharacter = useCharacterStore(state => state.undoCharacter);
+  const undoRemove = useCharacterStore(state => state.undoRemove);
+  const clearUndo = useCharacterStore(state => state.clearUndo);
   const [longPressId, setLongPressId] = useState<string | null>(null);
 
   const open = useCallback(
@@ -51,9 +54,7 @@ export default function RosterScreen({ navigation }: Props) {
     (character: Character) => {
       Alert.alert(
         'Удалить персонажа?',
-        `${
-          character.name || 'Без имени'
-        } будет удалён из хранилища безвозвратно.`,
+        `${character.name || 'Без имени'} будет удалён из ростера.`,
         [
           { text: 'Отмена', style: 'cancel' },
           {
@@ -168,6 +169,9 @@ export default function RosterScreen({ navigation }: Props) {
             <Text style={styles.subtitle}>ЛИСТ ПЕРСОНАЛЬНЫХ ДАННЫХ</Text>
           </View>
         </View>
+        <Text style={styles.hint}>
+          Долгое нажатие на карточке открывает удаление персонажа
+        </Text>
         <Text style={styles.tagline}>
           {characters.length
             ? `${characters.length} ${
@@ -213,6 +217,18 @@ export default function RosterScreen({ navigation }: Props) {
             text="Персонажей пока нет.\nНажмите «+ ПЕРСОНАЖ», чтобы бросить кости."
           />
         }
+      />
+
+      <Snackbar
+        visible={undoCharacter !== null}
+        message={
+          undoCharacter
+            ? `«${undoCharacter.name || 'Без имени'}» удалён`
+            : ''
+        }
+        actionLabel="ОТМЕНИТЬ"
+        onAction={() => undoRemove()}
+        onDismiss={() => clearUndo()}
       />
     </Screen>
   );
@@ -270,6 +286,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginTop: spacing.md,
     marginBottom: spacing.lg,
+  },
+  hint: {
+    color: colors.textFaint,
+    fontSize: font.tiny,
+    lineHeight: 15,
+    marginTop: spacing.sm,
   },
   headerActions: { flexDirection: 'row' },
   headerButton: { flex: 1, marginRight: spacing.sm },

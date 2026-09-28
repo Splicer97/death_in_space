@@ -1,9 +1,11 @@
 import React from 'react';
+import { Alert } from 'react-native';
 import TestRenderer, { act } from 'react-test-renderer';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import CreateScreen from '../src/screens/CreateScreen';
 import CharacterScreen from '../src/screens/CharacterScreen';
+import RosterScreen from '../src/screens/RosterScreen';
 import { emptyCharacter, useCharacterStore } from '../src/store/characterStore';
 import { TRAITS } from '../src/data/tables';
 import { storage } from '../src/store/storage';
@@ -11,6 +13,7 @@ import type { RootStackParamList } from '../src/navigation/types';
 
 type CreateProps = NativeStackScreenProps<RootStackParamList, 'Create'>;
 type CharacterProps = NativeStackScreenProps<RootStackParamList, 'Character'>;
+type RosterProps = NativeStackScreenProps<RootStackParamList, 'Roster'>;
 
 type NavMock = {
   navigate: jest.Mock;
@@ -80,7 +83,13 @@ describe('character creation flow', () => {
   beforeEach(() => {
     storage.clearAll();
     act(() => {
-      useCharacterStore.setState({ characters: [], activeId: null });
+      useCharacterStore.setState({
+        characters: [],
+        activeId: null,
+        hub: null,
+        undoCharacter: null,
+        undoHub: null,
+      });
     });
   });
 
@@ -201,7 +210,13 @@ describe('character sheet', () => {
   beforeEach(() => {
     storage.clearAll();
     act(() => {
-      useCharacterStore.setState({ characters: [], activeId: null });
+      useCharacterStore.setState({
+        characters: [],
+        activeId: null,
+        hub: null,
+        undoCharacter: null,
+        undoHub: null,
+      });
       useCharacterStore.getState().addCharacter({
         ...emptyCharacter(),
         name: 'Вейн',
@@ -312,6 +327,68 @@ describe('character sheet', () => {
       rollButton.props.onPress?.();
     });
     expect(calls.navigate).toHaveBeenCalledWith('Roll', { id });
+  });
+
+  it('keeps the undo snackbar alive after deleting from the character card', () => {
+    const { nav, calls } = makeNav<CharacterProps['navigation']>();
+    const id = useCharacterStore.getState().addCharacter({
+      ...emptyCharacter(),
+      name: 'Отменённый',
+    });
+    const stillInRoster = (): boolean =>
+      useCharacterStore.getState().characters.some(item => item.id === id);
+
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ЗАМЕТКИ');
+    const confirmSpy = jest.spyOn(Alert, 'alert');
+    press(tree.root, 'УДАЛИТЬ ПЕРСОНАЖА');
+    const buttons = confirmSpy.mock.calls[0][2] ?? [];
+    const destructive = buttons.find(
+      button => typeof button.style === 'string' && button.style === 'destructive',
+    );
+    act(() => {
+      destructive?.onPress?.();
+    });
+    expect(stillInRoster()).toBe(false);
+    expect(useCharacterStore.getState().undoCharacter?.id).toBe(id);
+    expect(calls.goBack).toHaveBeenCalled();
+
+    act(() => {
+      tree.unmount();
+    });
+
+    let roster!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      roster = TestRenderer.create(
+        <RosterScreen
+          navigation={makeNav<RosterProps['navigation']>().nav}
+          route={{ key: 'r', name: 'Roster' }}
+        />,
+      );
+    });
+
+    expect(collectText(roster.root)).toContain('удалён');
+    const undo = findByLabel(roster.root, 'ОТМЕНИТЬ');
+    act(() => {
+      undo.props.onPress();
+    });
+
+    const state = useCharacterStore.getState();
+    expect(stillInRoster()).toBe(true);
+    expect(state.undoCharacter).toBeNull();
+    expect(
+      state.characters.find(item => item.id === id)?.name,
+    ).toBe('Отменённый');
+    confirmSpy.mockRestore();
   });
 
   it('renders a fallback when the character is missing', () => {

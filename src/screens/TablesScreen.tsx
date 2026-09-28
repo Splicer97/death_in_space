@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Chip, Divider, Screen, SectionTitle } from '../components/ui';
+import {
+  Card,
+  Chip,
+  Divider,
+  Screen,
+  SearchInput,
+  SectionTitle,
+} from '../components/ui';
 import { Track } from '../components/Track';
 import { DERIVED_HINTS, RULES } from '../data/armor';
 import { ORIGINS } from '../data/origins';
 import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../data/mutations';
 import { HUB_TABLES, NPC_STARSHIPS, NPC_STATIONS } from '../data/hub';
-import { TABLES } from '../data/tables';
+import { TABLES, type Table } from '../data/tables';
 import { colors, font, radius, spacing } from '../theme';
 import {
   HUB_CORE_FUNCTIONS,
@@ -56,6 +63,60 @@ export default function TablesScreen() {
   const [category, setCategory] = useState<Category>('TABLES');
   const [open, setOpen] = useState<Record<string, boolean>>({});
   const [dice, setDice] = useState(() => rollQuickDice());
+  const [query, setQuery] = useState('');
+
+  const needle = query.trim().toLowerCase();
+  const matches = (text: string) => !needle || text.toLowerCase().includes(needle);
+  const entriesOf = (table: Table) =>
+    needle
+      ? table.entries.filter(
+          entry => matches(entry.text) || matches(entry.description ?? ''),
+        )
+      : table.entries;
+
+  const filteredTables = TABLES.filter(
+    table =>
+      matches(table.title) ||
+      table.entries.some(entry => matches(entry.text)),
+  );
+  const filteredHubTables = HUB_TABLES.filter(
+    table =>
+      matches(table.title) ||
+      table.entries.some(entry => matches(entry.text) || matches(entry.description ?? '')),
+  );
+  const visibleOrigins = ORIGINS.filter(
+    origin =>
+      matches(origin.name) ||
+      matches(origin.description) ||
+      origin.benefits.some(benefit => matches(benefit.name) || matches(benefit.description)),
+  );
+  const visibleMutations = COSMIC_MUTATIONS.filter(
+    mutation => matches(mutation.name) || matches(mutation.description),
+  );
+  const visibleCorruptions = VOID_CORRUPTIONS.filter(item => matches(item.text));
+  const visibleNpcStarships = NPC_STARSHIPS.filter(
+    item =>
+      matches(item.type) ||
+      matches(item.modules) ||
+      matches(item.energy) ||
+      matches(item.crew),
+  );
+  const visibleNpcStations = NPC_STATIONS.filter(
+    item =>
+      matches(item.type) ||
+      matches(item.modules) ||
+      matches(item.energy) ||
+      matches(item.crew),
+  );
+  const nothingFound =
+    needle.length > 0 &&
+    filteredTables.length === 0 &&
+    filteredHubTables.length === 0 &&
+    visibleOrigins.length === 0 &&
+    visibleMutations.length === 0 &&
+    visibleCorruptions.length === 0 &&
+    visibleNpcStarships.length === 0 &&
+    visibleNpcStations.length === 0;
 
   const toggle = (key: string) =>
     setOpen(current => ({ ...current, [key]: !current[key] }));
@@ -73,6 +134,14 @@ export default function TablesScreen() {
               onPress={() => setCategory(item)}
             />
           ))}
+        </View>
+        <View style={styles.searchWrap}>
+          <SearchInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Поиск по справочнику"
+            accessibilityLabel="Поиск по справочнику"
+          />
         </View>
         <View style={styles.diceRow}>
           {dice.map(item => (
@@ -93,9 +162,16 @@ export default function TablesScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
+        {nothingFound ? (
+          <Card>
+            <Text style={styles.body}>
+              {`По запросу «${query.trim()}» ничего не найдено. Попробуйте другое слово или очистить поиск.`}
+            </Text>
+          </Card>
+        ) : null}
         {category === 'TABLES' ? (
           <>
-            {TABLES.map(table => (
+            {filteredTables.map(table => (
               <Card key={table.key}>
                 <Pressable
                   accessibilityRole="button"
@@ -106,9 +182,9 @@ export default function TablesScreen() {
                     <Text style={styles.tableDie}>{table.die}</Text>
                   </View>
                 </Pressable>
-                {open[table.key] ? (
+                {open[table.key] || !!needle ? (
                   <View style={styles.entries}>
-                    {table.entries.map(entry => (
+                    {entriesOf(table).map(entry => (
                       <View key={entry.roll} style={styles.entry}>
                         <Text style={styles.entryRoll}>{entry.roll}</Text>
                         <View style={styles.flex}>
@@ -132,7 +208,7 @@ export default function TablesScreen() {
 
         {category === 'ORIGINS' ? (
           <>
-            {ORIGINS.map(origin => (
+            {visibleOrigins.map(origin => (
               <Card key={origin.key}>
                 <Text style={styles.tableTitle}>{origin.name}</Text>
                 <Text style={styles.body}>{origin.description}</Text>
@@ -153,7 +229,7 @@ export default function TablesScreen() {
               title="КОСМИЧЕСКИЕ МУТАЦИИ"
               subtitle="1d20 · активация тратит очки пустоты"
             />
-            {COSMIC_MUTATIONS.map(mutation => (
+            {visibleMutations.map(mutation => (
               <View key={mutation.id} style={styles.entry}>
                 <Text style={styles.entryRoll}>{mutation.id}</Text>
                 <View style={styles.flex}>
@@ -171,7 +247,7 @@ export default function TablesScreen() {
               title="ПОРЧА ПУСТОТЫ"
               subtitle="1d20 · бросок, если потраченная на преимущество пустота не сработала"
             />
-            {VOID_CORRUPTIONS.map(corruption => (
+            {visibleCorruptions.map(corruption => (
               <View key={corruption.id} style={styles.entry}>
                 <Text style={styles.entryRoll}>{corruption.id}</Text>
                 <Text style={styles.body}>{corruption.text}</Text>
@@ -206,7 +282,7 @@ export default function TablesScreen() {
                 {`Звездолёт: УЗ ${STARTING_HUBS.starship.defenseRating}, состояние ${STARTING_HUBS.starship.conditionMax}, топливо ${STARTING_HUBS.starship.fuelMax}. Станция: УЗ ${STARTING_HUBS.station.defenseRating}, состояние ${STARTING_HUBS.station.conditionMax}, топливо ${STARTING_HUBS.station.fuelMax}. Целостность корпуса — ${HUB_MAX_INTEGRITY}%. Модули в начале игры не установлены: их нужно найти, украсть или получить по контракту.`}
               </Text>
             </Card>
-            {HUB_TABLES.map(table => (
+            {filteredHubTables.map(table => (
               <Card key={table.key}>
                 <Pressable
                   accessibilityRole="button"
@@ -217,9 +293,9 @@ export default function TablesScreen() {
                     <Text style={styles.tableDie}>{table.die}</Text>
                   </View>
                 </Pressable>
-                {open[table.key] ? (
+                {open[table.key] || !!needle ? (
                   <View style={styles.entries}>
-                    {table.entries.map(entry => (
+                    {entriesOf(table).map(entry => (
                       <View key={entry.roll} style={styles.entry}>
                         <Text style={styles.entryRoll}>{entry.roll}</Text>
                         <View style={styles.flex}>
@@ -255,7 +331,7 @@ export default function TablesScreen() {
                 title="НЕИГРОВЫЕ ЗВЕЗДОЛЁТЫ"
                 subtitle="готовые корабли для мастера"
               />
-              {NPC_STARSHIPS.map(item => (
+              {visibleNpcStarships.map(item => (
                 <View key={item.roll} style={styles.entry}>
                   <Text style={styles.entryRoll}>{item.roll}</Text>
                   <View style={styles.flex}>
@@ -273,7 +349,7 @@ export default function TablesScreen() {
                 title="НЕИГРОВЫЕ СТАНЦИИ"
                 subtitle="готовые станции для мастера"
               />
-              {NPC_STATIONS.map(item => (
+              {visibleNpcStations.map(item => (
                 <View key={item.roll} style={styles.entry}>
                   <Text style={styles.entryRoll}>{item.roll}</Text>
                   <View style={styles.flex}>
@@ -430,6 +506,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'right',
   },
+  searchWrap: {paddingHorizontal: spacing.lg},
   bullet: {
     color: colors.textDim,
     fontSize: font.small,

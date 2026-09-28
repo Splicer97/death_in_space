@@ -1,0 +1,111 @@
+import { findOrigin } from '../data/origins';
+import {
+  availableSlots,
+  defenseRating,
+  itemSlots,
+  type Character,
+  type Hub,
+  type InstalledModule,
+} from '../types';
+
+function line(label: string, value: string | number): string {
+  const text = String(value).trim();
+  return text ? `${label}: ${text}` : '';
+}
+
+function section(title: string, lines: string[]): string {
+  const body = lines.filter(Boolean);
+  return body.length ? [title, ...body].join('\n') : '';
+}
+
+function sign(value: number): string {
+  return value > 0 ? `+${value}` : String(value);
+}
+
+function moduleLine(item: InstalledModule): string {
+  return `• ${item.name} — ${item.energy} ВМ`;
+}
+
+export function characterToText(character: Character): string {
+  const origin = character.origin ? findOrigin(character.origin) : null;
+  const blocks = [
+    'СМЕРТЬ В КОСМОСЕ — ЛИСТ ПЕРСОНАЛЬНЫХ ДАННЫХ',
+    section(character.name || 'БЕЗ ИМЕНИ', [
+      character.nickname ? `Прозвище: ${character.nickname}` : '',
+      character.playerName ? `Игрок: ${character.playerName}` : '',
+      origin ? `Происхождение: ${origin.name}` : '',
+      line('Опыт', character.xp),
+    ]),
+    section('ХАРАКТЕРИСТИКИ', [
+      line('Тел', sign(character.abilities.body)),
+      line('Лов', sign(character.abilities.dexterity)),
+      line('Рас', sign(character.abilities.savvy)),
+      line('Тех', sign(character.abilities.tech)),
+      line('ОЗ', `${character.hp}/${character.hpMax}`),
+      line('УЗ', defenseRating(character.abilities.dexterity, character.armor)),
+      line('Очки пустоты', character.voidPoints),
+      line('Жизнеобеспечение', character.lifeSupport),
+    ]),
+    section('ПРЕДЫСТОРИЯ', [
+      line('Прошлое', character.background),
+      line('Принадлежность', character.pastAllegiance),
+      line('Черта', character.trait),
+      line('Движущая сила', character.drive),
+      line('Внешность', character.looks),
+    ]),
+    section('МУТАЦИИ И ПОРЧА ПУСТОТЫ', [
+      ...character.mutations.map(name => `• ${name}`),
+      ...character.voidCorruption.map(name => `• ${name}`),
+    ]),
+    section('СНАРЯЖЕНИЕ', [
+      line('Слоты предметов', `${availableSlots(character.abilities.body, character.armor)}/${itemSlots(character.abilities.body)}`),
+      ...character.items.map(item => `• ${item.name} — состояние ${item.condition}`),
+      line('Мелочи', character.smallItems),
+      line('Оружие 1', `${character.weapons[0].name} (${character.weapons[0].damage}), состояние ${character.weapons[0].condition}/${character.weapons[0].uses}`),
+      line('Оружие 2', `${character.weapons[1].name} (${character.weapons[1].damage}), состояние ${character.weapons[1].condition}/${character.weapons[1].uses}`),
+      character.armor
+        ? `Броня: ${character.armor.type} (УЗ +${character.armor.drBonus}${
+            character.armor.protectsAgainst
+              ? `, защита: ${character.armor.protectsAgainst}`
+              : ''
+          })`
+        : 'Броня: нет',
+    ]),
+    section('РЕСУРСЫ', [
+      line('Гало', character.holos),
+      line('Долг', character.debt),
+    ]),
+    section('СТАРТОВОЕ', [
+      line('Набор', character.startingKit),
+      line('Безделушка', character.trinket),
+      line('Бонус', character.startingBonus),
+    ]),
+    section('ЗАМЕТКИ', [character.notes]),
+  ];
+
+  return blocks.filter(Boolean).join('\n\n');
+}
+
+export function hubToText(hub: Hub): string {
+  const used = hub.modules.reduce((sum, item) => sum + item.energy, 0);
+  const blocks = [
+    'СМЕРТЬ В КОСМОСЕ — ЛИСТ ХАБА',
+    section(hub.hull || (hub.type === 'starship' ? 'ЗВЕЗДОЛЁТ' : 'СТАНЦИЯ'), [
+      `Тип: ${hub.type === 'starship' ? 'звездолёт' : 'станция'}`,
+      line('Источник энергии', hub.energySource),
+      line('Уровень защиты', hub.defenseRating),
+      line('Состояние', `${hub.condition}/${hub.conditionMax}`),
+      line('Топливо', `${hub.fuel}/${hub.fuelMax}`),
+      line('Целостность корпуса', `${hub.integrity}%`),
+      line('Выходная мощность', `${used}/${hub.energyOutput} ВМ`),
+    ]),
+    section('ПРЕДЫСТОРИЯ И ИЗЮМИНКА', [
+      line('Предыстория', hub.backstory),
+      line('Изюминка', hub.quirk),
+    ]),
+    section('УСТАНОВЛЕННЫЕ МОДУЛИ', hub.modules.map(moduleLine)),
+    section('ЗАМЕТКИ', [hub.notes]),
+  ];
+
+  return blocks.filter(Boolean).join('\n\n');
+}

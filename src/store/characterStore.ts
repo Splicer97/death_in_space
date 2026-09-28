@@ -64,9 +64,14 @@ export interface CharacterStore {
   characters: Character[];
   activeId: string | null;
   hub: Hub | null;
+  undoCharacter: Character | null;
+  undoHub: Hub | null;
+  undoRemove: () => void;
+  clearUndo: () => void;
   addCharacter: (draft: CharacterDraft) => string;
   updateCharacter: (id: string, patch: Partial<Character>) => void;
   removeCharacter: (id: string) => void;
+  restoreCharacter: (character: Character) => void;
   setActive: (id: string | null) => void;
   createHub: (draft: HubDraft) => void;
   updateHub: (patch: Partial<Hub>) => void;
@@ -80,6 +85,8 @@ export function createCharacterStore() {
         characters: [],
         activeId: null,
         hub: null,
+        undoCharacter: null,
+        undoHub: null,
 
         addCharacter: draft => {
           const now = Date.now();
@@ -108,13 +115,51 @@ export function createCharacterStore() {
 
         removeCharacter: id => {
           set(state => {
+            const removed = state.characters.find(item => item.id === id);
             const characters = state.characters.filter(item => item.id !== id);
             return {
               characters,
               activeId: state.activeId === id ? null : state.activeId,
+              undoCharacter: removed ?? null,
             };
           });
         },
+
+        restoreCharacter: character => {
+          set(state => {
+            if (state.characters.some(item => item.id === character.id)) {
+              return state;
+            }
+            return {
+              characters: [character, ...state.characters],
+              activeId: character.id,
+            };
+          });
+        },
+
+        undoRemove: () =>
+          set(state => {
+            if (state.undoCharacter) {
+              const character = state.undoCharacter;
+              const characters = state.characters.some(
+                item => item.id === character.id,
+              )
+                ? state.characters
+                : [character, ...state.characters];
+              return {
+                characters,
+                activeId: character.id,
+                undoCharacter: null,
+                undoHub: null,
+              };
+            }
+            if (state.undoHub) {
+              return { hub: state.undoHub, undoHub: null, undoCharacter: null };
+            }
+            return state;
+          }),
+
+        clearUndo: () => set({ undoCharacter: null, undoHub: null }),
 
         setActive: id => set({ activeId: id }),
 
@@ -131,7 +176,8 @@ export function createCharacterStore() {
           );
         },
 
-        removeHub: () => set({ hub: null }),
+        removeHub: () =>
+          set(state => ({ hub: null, undoHub: state.hub, undoCharacter: null })),
       }),
       {
         name: 'characters',

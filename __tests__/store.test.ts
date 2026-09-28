@@ -10,7 +10,13 @@ import {performRoll, rollAbilityValue} from '../src/utils/dice';
 describe('character store', () => {
   beforeEach(() => {
     storage.clearAll();
-    useCharacterStore.setState({characters: [], activeId: null, hub: null});
+    useCharacterStore.setState({
+      characters: [],
+      activeId: null,
+      hub: null,
+      undoCharacter: null,
+      undoHub: null,
+    });
   });
 
   it('starts empty', () => {
@@ -50,6 +56,49 @@ describe('character store', () => {
 
     expect(state.characters).toHaveLength(0);
     expect(state.activeId).toBeNull();
+  });
+
+  it('restores a deleted character with the same id', () => {
+    const store = useCharacterStore.getState();
+    const id = store.addCharacter({...emptyCharacter(), name: 'Возвращённый'});
+    const snapshot = useCharacterStore.getState().characters[0];
+
+    store.removeCharacter(id);
+    expect(useCharacterStore.getState().characters).toHaveLength(0);
+
+    store.restoreCharacter(snapshot);
+    const state = useCharacterStore.getState();
+
+    expect(state.characters).toHaveLength(1);
+    expect(state.characters[0].id).toBe(id);
+    expect(state.characters[0].name).toBe('Возвращённый');
+    expect(state.activeId).toBe(id);
+  });
+
+  it('brings a removed character back through undoRemove', () => {
+    const store = useCharacterStore.getState();
+    const id = store.addCharacter({...emptyCharacter(), name: 'Отменённый'});
+    store.removeCharacter(id);
+
+    expect(useCharacterStore.getState().undoCharacter?.name).toBe('Отменённый');
+
+    useCharacterStore.getState().undoRemove();
+    const state = useCharacterStore.getState();
+
+    expect(state.characters).toHaveLength(1);
+    expect(state.characters[0].id).toBe(id);
+    expect(state.undoCharacter).toBeNull();
+  });
+
+  it('ignores a restore of a character that is still in the roster', () => {
+    const store = useCharacterStore.getState();
+    const id = store.addCharacter({...emptyCharacter(), name: 'Дубль'});
+    const snapshot = useCharacterStore.getState().characters[0];
+
+    store.restoreCharacter(snapshot);
+
+    expect(useCharacterStore.getState().characters).toHaveLength(1);
+    expect(useCharacterStore.getState().activeId).toBe(id);
   });
 
   it('writes the state into MMKV', () => {
@@ -128,7 +177,13 @@ describe('dice', () => {
 describe('hub store', () => {
   beforeEach(() => {
     storage.clearAll();
-    useCharacterStore.setState({characters: [], activeId: null, hub: null});
+    useCharacterStore.setState({
+      characters: [],
+      activeId: null,
+      hub: null,
+      undoCharacter: null,
+      undoHub: null,
+    });
   });
 
   it('starts without a hub', () => {
@@ -185,6 +240,30 @@ describe('hub store', () => {
 
     expect(state.hub).toBeNull();
     expect(state.characters).toHaveLength(1);
+  });
+
+  it('brings a removed hub back through undoRemove', () => {
+    const store = useCharacterStore.getState();
+    store.createHub({...STARTING_HUBS.starship, hull: 'Возвращённый хаб'});
+    store.removeHub();
+
+    expect(useCharacterStore.getState().undoHub?.hull).toBe(
+      'Возвращённый хаб',
+    );
+
+    useCharacterStore.getState().undoRemove();
+    const state = useCharacterStore.getState();
+
+    expect(state.hub?.hull).toBe('Возвращённый хаб');
+    expect(state.undoHub).toBeNull();
+  });
+
+  it('keeps the undo slot empty when nothing was removed', () => {
+    useCharacterStore.getState().undoRemove();
+
+    const state = useCharacterStore.getState();
+    expect(state.undoCharacter).toBeNull();
+    expect(state.undoHub).toBeNull();
   });
 
   it('rehydrates the hub from MMKV', async () => {
