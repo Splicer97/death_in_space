@@ -453,7 +453,7 @@ export default function CreateScreen({ navigation }: Props) {
             </Text>
             <View style={styles.spacer} />
             <Field
-              label="ЖЕТОНЫ ПУСТОТЫ (0–4)"
+              label="ОЧКИ ПУСТОТЫ (0–4)"
               value={String(draft.voidPoints)}
               onChangeText={value =>
                 patch({
