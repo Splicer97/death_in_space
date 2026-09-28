@@ -817,12 +817,12 @@ export const HUB_MODULE_GROUPS: {
   { key: 'tech', title: 'ТЕХ-МОДУЛИ', subtitle: 'интерфейс, безопасность, наука' },
   {
     key: 'boarding',
-    title: 'БОЕВЫЕ МОДУЛИ',
+    title: 'БОЕВЫЕ · АБОРДАЖ',
     subtitle: 'дистанция абордажа',
   },
   {
     key: 'gunnery',
-    title: 'БОЕВЫЕ МОДУЛИ',
+    title: 'БОЕВЫЕ · СТРЕЛЬБА',
     subtitle: 'дистанция стрельбы',
   },
 ];

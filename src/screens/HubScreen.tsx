@@ -150,7 +150,11 @@ export default function HubScreen({ navigation }: Props) {
         `Уровень защиты, состояние, запас топлива и выходная мощность будут взяты от ${from}, а установленные модули сбросятся. Название хаба сохранится.`,
         [
           { text: 'Отмена', style: 'cancel' },
-          { text: 'Сменить', style: 'destructive', onPress: () => applyType(type) },
+          {
+            text: 'Сменить',
+            style: 'destructive',
+            onPress: () => applyType(type),
+          },
         ],
       );
     },
@@ -334,31 +338,25 @@ export default function HubScreen({ navigation }: Props) {
                   />
                 </View>
                 <Divider />
-                <View style={styles.row}>
-                  <View style={styles.half}>
-                    <NumberStepper
-                      label="УРОВЕНЬ ЗАЩИТЫ"
-                      value={draft.defenseRating}
-                      onChange={value => patch({ defenseRating: value })}
-                      min={0}
-                      max={40}
-                    />
-                  </View>
-                  <View style={styles.half}>
-                    <NumberStepper
-                      label="МАКС. СОСТОЯНИЕ"
-                      value={draft.conditionMax}
-                      onChange={value =>
-                        patch({
-                          conditionMax: value,
-                          condition: Math.min(draft.condition, value),
-                        })
-                      }
-                      min={1}
-                      max={20}
-                    />
-                  </View>
-                </View>
+                <NumberStepper
+                  label="УРОВЕНЬ ЗАЩИТЫ"
+                  value={draft.defenseRating}
+                  onChange={value => patch({ defenseRating: value })}
+                  min={0}
+                  max={40}
+                />
+                <NumberStepper
+                  label="МАКС. СОСТОЯНИЕ"
+                  value={draft.conditionMax}
+                  onChange={value =>
+                    patch({
+                      conditionMax: value,
+                      condition: Math.min(draft.condition, value),
+                    })
+                  }
+                  min={1}
+                  max={20}
+                />
                 <NumberStepper
                   label="ЗАПАС ТОПЛИВА"
                   value={draft.fuelMax}
@@ -468,8 +466,8 @@ export default function HubScreen({ navigation }: Props) {
                   title="БРОСИТЬ d20"
                   onPress={() =>
                     patch({
-                      backstory:
-                        backstoryEntries(draft.type)[rollDie(20) - 1].text,
+                      backstory: backstoryEntries(draft.type)[rollDie(20) - 1]
+                        .text,
                     })
                   }
                   style={styles.presetButton}
@@ -509,7 +507,9 @@ export default function HubScreen({ navigation }: Props) {
                 />
                 <Button
                   title="БРОСИТЬ d20"
-                  onPress={() => patch({ quirk: quirkEntries()[rollDie(20) - 1].text })}
+                  onPress={() =>
+                    patch({ quirk: quirkEntries()[rollDie(20) - 1].text })
+                  }
                   style={styles.presetButton}
                 />
               </View>
@@ -629,9 +629,8 @@ function HubSheet({
   onReset: () => void;
   onShare: () => void;
 }) {
-  const [moduleTab, setModuleTab] = useState<keyof typeof HUB_MODULES>(
-    'general',
-  );
+  const [moduleTab, setModuleTab] =
+    useState<keyof typeof HUB_MODULES>('general');
   const [query, setQuery] = useState('');
   const [picker, setPicker] = useState<{
     title: string;
@@ -662,7 +661,10 @@ function HubSheet({
     [hub.modules, update],
   );
 
-  const installed = useMemo(() => new Set(hub.modules.map(m => m.name)), [hub.modules]);
+  const installed = useMemo(
+    () => new Set(hub.modules.map(m => m.name)),
+    [hub.modules],
+  );
 
   const visibleModules = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -761,8 +763,8 @@ function HubSheet({
           {overdrawn ? (
             <Text style={styles.warning}>
               Сумма затрат энергии модулей ({used}) превышает выходную мощность
-              хаба ({hub.energyOutput}). Либо уберите модуль, либо модернизируйте
-              источник энергии.
+              хаба ({hub.energyOutput}). Либо уберите модуль, либо
+              модернизируйте источник энергии.
             </Text>
           ) : null}
           <View style={styles.presetRow}>
@@ -914,9 +916,7 @@ function HubSheet({
             />
           </View>
           <Text style={styles.storyLabel}>ПРЕДЫСТОРИЯ</Text>
-          <Text style={styles.storyText}>
-            {hub.backstory || '—'}
-          </Text>
+          <Text style={styles.storyText}>{hub.backstory || '—'}</Text>
           <Text style={styles.storyLabel}>ИЗЮМИНКА</Text>
           <Text style={styles.storyText}>{hub.quirk || '—'}</Text>
         </Card>
@@ -949,7 +949,9 @@ function HubSheet({
             label="ЦЕЛОСТНОСТЬ КОРПУСА"
             value={hub.integrity}
             onChange={value =>
-              update({ integrity: Math.max(0, Math.min(HUB_MAX_INTEGRITY, value)) })
+              update({
+                integrity: Math.max(0, Math.min(HUB_MAX_INTEGRITY, value)),
+              })
             }
             min={0}
             max={HUB_MAX_INTEGRITY}
@@ -958,7 +960,9 @@ function HubSheet({
           <NumberStepper
             label="ТОПЛИВО"
             value={hub.fuel}
-            onChange={value => update({ fuel: Math.max(0, Math.min(hub.fuelMax, value)) })}
+            onChange={value =>
+              update({ fuel: Math.max(0, Math.min(hub.fuelMax, value)) })
+            }
             min={0}
             max={hub.fuelMax}
             big
@@ -1016,8 +1020,8 @@ function HubStat({
 }
 
 const styles = StyleSheet.create({
-  flex: {flex: 1},
-  content: {padding: spacing.lg, paddingBottom: spacing.xxl},
+  flex: { flex: 1 },
+  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   stepBar: {
     flexDirection: 'row',
     paddingHorizontal: spacing.lg,
@@ -1030,8 +1034,8 @@ const styles = StyleSheet.create({
     marginRight: 4,
     borderRadius: 2,
   },
-  stepDotActive: {backgroundColor: colors.yellow},
-  typeRow: {flexDirection: 'row'},
+  stepDotActive: { backgroundColor: colors.yellow },
+  typeRow: { flexDirection: 'row' },
   typeCard: {
     flex: 1,
     borderWidth: 1,
@@ -1041,8 +1045,11 @@ const styles = StyleSheet.create({
     marginRight: spacing.sm,
     backgroundColor: colors.surfaceAlt,
   },
-  typeCardActive: {borderColor: colors.yellow, backgroundColor: colors.surfaceHi},
-  typeIcon: {fontSize: 24, marginBottom: spacing.xs},
+  typeCardActive: {
+    borderColor: colors.yellow,
+    backgroundColor: colors.surfaceHi,
+  },
+  typeIcon: { fontSize: 24, marginBottom: spacing.xs },
   typeName: {
     color: colors.text,
     fontSize: font.small,
@@ -1055,10 +1062,10 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     marginTop: spacing.xs,
   },
-  row: {flexDirection: 'row'},
-  half: {flex: 1, marginRight: spacing.sm},
-  presetRow: {flexDirection: 'row', marginBottom: spacing.md},
-  presetButton: {flex: 1, marginRight: spacing.sm},
+  row: { flexDirection: 'row' },
+  half: { flex: 1, marginRight: spacing.sm },
+  presetRow: { flexDirection: 'row', marginBottom: spacing.md },
+  presetButton: { flex: 1, marginRight: spacing.sm },
   help: {
     color: colors.textFaint,
     fontSize: font.small,
@@ -1086,8 +1093,8 @@ const styles = StyleSheet.create({
     borderTopColor: colors.border,
     backgroundColor: colors.bg,
   },
-  footerButton: {flex: 1, marginRight: spacing.sm},
-  hubHead: {flexDirection: 'row', alignItems: 'center'},
+  footerButton: { flex: 1, marginRight: spacing.sm },
+  hubHead: { flexDirection: 'row', alignItems: 'center' },
   hubIcon: {
     width: 50,
     height: 50,
@@ -1099,9 +1106,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: spacing.md,
   },
-  hubIconText: {fontSize: 24},
-  hubName: {color: colors.yellow, fontSize: font.heading, fontWeight: '800'},
-  hubMeta: {color: colors.textFaint, fontSize: font.tiny, marginTop: 2},
+  hubIconText: { fontSize: 24 },
+  hubName: { color: colors.yellow, fontSize: font.heading, fontWeight: '800' },
+  hubMeta: { color: colors.textFaint, fontSize: font.tiny, marginTop: 2 },
   headButton: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -1109,7 +1116,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
   },
-  headActions: {flexDirection: 'row', alignItems: 'center'},
+  headActions: { flexDirection: 'row', alignItems: 'center' },
   headIconButton: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -1118,17 +1125,17 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     marginRight: spacing.xs,
   },
-  headIconText: {color: colors.textDim, fontSize: font.body},
-  spacer: {height: spacing.md},
+  headIconText: { color: colors.textDim, fontSize: font.body },
+  spacer: { height: spacing.md },
   headButtonText: {
     color: colors.textDim,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
-  statGrid: {flexDirection: 'row', marginTop: spacing.lg},
-  stat: {flex: 1, alignItems: 'center'},
-  statValue: {color: colors.text, fontSize: font.heading, fontWeight: '800'},
+  statGrid: { flexDirection: 'row', marginTop: spacing.lg },
+  stat: { flex: 1, alignItems: 'center' },
+  statValue: { color: colors.text, fontSize: font.heading, fontWeight: '800' },
   statLabel: {
     color: colors.textFaint,
     fontSize: 9,
@@ -1144,7 +1151,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: spacing.md,
   },
-  powerFill: {height: '100%'},
+  powerFill: { height: '100%' },
   subLabel: {
     color: colors.yellow,
     fontSize: font.tiny,
@@ -1162,10 +1169,10 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     backgroundColor: colors.surfaceAlt,
   },
-  moduleName: {color: colors.text, fontSize: font.small, fontWeight: '700'},
-  moduleRemove: {paddingHorizontal: spacing.sm},
-  moduleRemoveText: {color: colors.textFaint, fontSize: font.small},
-  moduleTabs: {flexDirection: 'row', marginBottom: spacing.md},
+  moduleName: { color: colors.text, fontSize: font.small, fontWeight: '700' },
+  moduleRemove: { paddingHorizontal: spacing.sm },
+  moduleRemoveText: { color: colors.textFaint, fontSize: font.small },
+  moduleTabs: { flexDirection: 'row', marginBottom: spacing.md },
   moduleTab: {
     flex: 1,
     borderWidth: 1,
@@ -1174,15 +1181,19 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     marginRight: spacing.xs,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  moduleTabActive: {borderColor: colors.yellow, backgroundColor: colors.surfaceHi},
+  moduleTabActive: {
+    borderColor: colors.yellow,
+    backgroundColor: colors.surfaceHi,
+  },
   moduleTabText: {
     color: colors.textFaint,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '800',
-    letterSpacing: 0.6,
+    textAlign: 'center',
   },
-  moduleTabTextActive: {color: colors.yellow},
+  moduleTabTextActive: { color: colors.yellow },
   moduleCard: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -1191,8 +1202,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     ...shadow.card,
   },
-  moduleCardWarn: {opacity: 0.55},
-  moduleCardHead: {flexDirection: 'row', alignItems: 'center'},
+  moduleCardWarn: { opacity: 0.55 },
+  moduleCardHead: { flexDirection: 'row', alignItems: 'center' },
   moduleCardName: {
     color: colors.text,
     fontSize: font.small,
@@ -1225,12 +1236,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: spacing.md,
   },
-  coreRow: {marginBottom: spacing.md},
+  coreRow: { marginBottom: spacing.md },
   coreName: {
     color: colors.text,
     fontSize: font.small,
     fontWeight: '800',
     marginBottom: 2,
   },
-  coreDesc: {color: colors.textFaint, fontSize: font.small, lineHeight: 17},
+  coreDesc: { color: colors.textFaint, fontSize: font.small, lineHeight: 17 },
 });
