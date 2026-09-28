@@ -181,11 +181,11 @@ export default function CreateScreen({ navigation }: Props) {
         {step === 0 ? (
           <>
             <Card>
-              <SectionTitle
-                index="ШАГ 1"
-                title="ГЕНЕРАЦИЯ СПОСОБНОСТЕЙ"
-                subtitle="2d4, первая минус вторая · диапазон −3…+3 · максимум на старте +1"
-              />
+<SectionTitle
+                  index="ШАГ 1"
+                  title="ГЕНЕРАЦИЯ СПОСОБНОСТЕЙ"
+                  subtitle="2d4, первая минус вторая · диапазон −3…+3"
+                />
               {ABILITY_KEYS.map(key => (
                 <NumberStepper
                   key={key}
@@ -193,7 +193,7 @@ export default function CreateScreen({ navigation }: Props) {
                   value={draft.abilities[key]}
                   onChange={value => setAbility(key, value)}
                   min={-3}
-                  max={1}
+                  max={3}
                 />
               ))}
               <Text style={styles.sum}>
