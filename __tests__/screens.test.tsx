@@ -1,0 +1,331 @@
+import React from 'react';
+import TestRenderer, { act } from 'react-test-renderer';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import CreateScreen from '../src/screens/CreateScreen';
+import CharacterScreen from '../src/screens/CharacterScreen';
+import { emptyCharacter, useCharacterStore } from '../src/store/characterStore';
+import { TRAITS } from '../src/data/tables';
+import { storage } from '../src/store/storage';
+import type { RootStackParamList } from '../src/navigation/types';
+
+type CreateProps = NativeStackScreenProps<RootStackParamList, 'Create'>;
+type CharacterProps = NativeStackScreenProps<RootStackParamList, 'Character'>;
+
+type NavMock = {
+  navigate: jest.Mock;
+  replace: jest.Mock;
+  goBack: jest.Mock;
+  setOptions: jest.Mock;
+};
+
+function makeNav<T>(): { nav: T; calls: NavMock } {
+  const calls: NavMock = {
+    navigate: jest.fn(),
+    replace: jest.fn(),
+    goBack: jest.fn(),
+    setOptions: jest.fn(),
+  };
+  return { nav: calls as unknown as T, calls };
+}
+
+type Child = TestRenderer.ReactTestInstance | string;
+
+function collectText(node: TestRenderer.ReactTestInstance): string {
+  const parts: string[] = [];
+  const walk = (current: Child | Child[]): void => {
+    if (typeof current === 'string') {
+      parts.push(current);
+    } else if (Array.isArray(current)) {
+      current.forEach(walk);
+    } else {
+      current.children.forEach(walk);
+    }
+  };
+  walk(node.children);
+  return parts.join(' ');
+}
+
+function findByLabel(
+  tree: TestRenderer.ReactTestInstance,
+  label: string,
+): TestRenderer.ReactTestInstance {
+  return tree.findAll(node => node.props?.accessibilityLabel === label, {
+    deep: true,
+  })[0];
+}
+
+function pressNth(
+  tree: TestRenderer.ReactTestInstance,
+  text: string,
+  index: number,
+) {
+  const nodes = tree.findAll(
+    candidate =>
+      typeof candidate.props?.onPress === 'function' &&
+      collectText(candidate).includes(text),
+    { deep: true },
+  );
+  expect(nodes[index]).toBeDefined();
+  act(() => {
+    nodes[index].props.onPress();
+  });
+}
+
+function press(tree: TestRenderer.ReactTestInstance, text: string) {
+  pressNth(tree, text, 0);
+}
+
+describe('character creation flow', () => {
+  beforeEach(() => {
+    storage.clearAll();
+    act(() => {
+      useCharacterStore.setState({ characters: [], activeId: null });
+    });
+  });
+
+  it('accepts hand-written details and details chosen from the table', () => {
+    const { nav } = makeNav<CreateProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CreateScreen navigation={nav} route={{ key: 'k', name: 'Create' }} />,
+      );
+    });
+    press(tree.root, 'БРОСИТЬ 2d4 × 4');
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'ДАЛЬШЕ');
+
+    const nameInput = tree.root.findAll(
+      node =>
+        typeof node.type === 'string' && node.props.placeholder === 'Кто ты?',
+    )[0];
+    act(() => {
+      nameInput.props.onChangeText('Вейн');
+    });
+
+    // Hand-written background, no dice at all.
+    const detailInputs = tree.root.findAll(
+      node =>
+        typeof node.type === 'string' &&
+        typeof node.props.placeholder === 'string' &&
+        node.props.placeholder.startsWith('Впишите своё'),
+    );
+    expect(detailInputs.length).toBe(4);
+    act(() => {
+      detailInputs[0].props.onChangeText('Беглый с Кара-Корума');
+    });
+
+    // Trait picked from the d20 table instead of rolled.
+    press(findByLabel(tree.root, 'Таблица: черта'), '');
+    press(tree.root, TRAITS[0].text);
+
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'СОЗДАТЬ');
+
+    const created = useCharacterStore.getState().characters[0];
+    expect(created.background).toBe('Беглый с Кара-Корума');
+    expect(created.trait).toBe(TRAITS[0].text);
+  });
+
+  it('creates a character through the wizard and persists it to MMKV', () => {
+    const { nav, calls } = makeNav<CreateProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CreateScreen navigation={nav} route={{ key: 'k', name: 'Create' }} />,
+      );
+    });
+
+    // Step 1: roll abilities.
+    press(tree.root, 'БРОСИТЬ 2d4 × 4');
+    // Step 2: pick an origin.
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'КАРБОН');
+    press(tree.root, 'ШЕСТЕРЁНКОГОЛОВЫЙ');
+    press(tree.root, 'ДАЛЬШЕ');
+
+    // Step 3: details.
+    const nameInput = tree.root.findAll(
+      node =>
+        typeof node.type === 'string' && node.props.placeholder === 'Кто ты?',
+    )[0];
+    act(() => {
+      nameInput.props.onChangeText('Вейн');
+    });
+    press(tree.root, 'ДАЛЬШЕ');
+
+    // Steps 4-5.
+    press(tree.root, 'ДАЛЬШЕ');
+    press(tree.root, 'ДАЛЬШЕ');
+
+    // Step 6: gear.
+    press(tree.root, 'БРОСИТЬ 3d10');
+    press(tree.root, 'СОЗДАТЬ');
+
+    const state = useCharacterStore.getState();
+    expect(state.characters).toHaveLength(1);
+    expect(state.characters[0].name).toBe('Вейн');
+    expect(state.characters[0].origin).toBe('carbon');
+    expect(state.characters[0].originBenefits).toEqual(['ШЕСТЕРЁНКОГОЛОВЫЙ']);
+    expect(state.characters[0].holos).toBeGreaterThanOrEqual(3);
+    expect(calls.replace).toHaveBeenCalledWith('Character', {
+      id: state.characters[0].id,
+    });
+
+    const raw = storage.getString('characters') as string;
+    expect(JSON.parse(raw).state.characters[0].name).toBe('Вейн');
+  });
+
+  it('refuses to create an unnamed character', () => {
+    const { nav } = makeNav<CreateProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CreateScreen navigation={nav} route={{ key: 'k', name: 'Create' }} />,
+      );
+    });
+
+    for (let i = 0; i < 5; i += 1) {
+      press(tree.root, 'ДАЛЬШЕ');
+    }
+    press(tree.root, 'СОЗДАТЬ');
+
+    expect(useCharacterStore.getState().characters).toHaveLength(0);
+  });
+});
+
+describe('character sheet', () => {
+  beforeEach(() => {
+    storage.clearAll();
+    act(() => {
+      useCharacterStore.setState({ characters: [], activeId: null });
+      useCharacterStore.getState().addCharacter({
+        ...emptyCharacter(),
+        name: 'Вейн',
+        hpMax: 6,
+        hp: 3,
+        abilities: { body: 2, dexterity: 1, savvy: 0, tech: -1 },
+      });
+    });
+  });
+
+  it('renders derived defense rating and slot count', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    const texts = JSON.stringify(tree.toJSON());
+    expect(texts).toContain('13'); // 12 + ЛОВ 1
+    expect(texts).toContain('14'); // 12 + ТЕЛ 2
+  });
+
+  it('applies the armor DR bonus to the defense rating', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        armor: {
+          type: 'Средний бронежилет (флак)',
+          protectsAgainst: 'пули',
+          drBonus: 2,
+        },
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    expect(JSON.stringify(tree.toJSON())).toContain('15');
+  });
+
+  it('keeps the armor DR bonus when the armor type is edited', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        armor: {
+          type: 'Средний бронежилет (флак)',
+          protectsAgainst: 'пули',
+          drBonus: 2,
+        },
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ВЕЩИ');
+    const typeInput = tree.root.findAll(node => node.props?.label === 'ТИП', {
+      deep: true,
+    })[0];
+    act(() => {
+      typeInput.props.onChangeText('Свой доспех');
+    });
+
+    expect(useCharacterStore.getState().characters[0].armor).toEqual({
+      type: 'Свой доспех',
+      protectsAgainst: 'пули',
+      drBonus: 2,
+    });
+  });
+
+  it('opens the dice roller', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav, calls } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    const rollButton = findByLabel(tree.root, 'Открыть броски');
+    act(() => {
+      rollButton.props.onPress?.();
+    });
+    expect(calls.navigate).toHaveBeenCalledWith('Roll', { id });
+  });
+
+  it('renders a fallback when the character is missing', () => {
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id: 'нет-такого' } }}
+        />,
+      );
+    });
+
+    expect(JSON.stringify(tree.toJSON())).toContain('Персонаж не найден');
+  });
+});
