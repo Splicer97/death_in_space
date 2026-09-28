@@ -209,7 +209,7 @@ describe('character creation flow', () => {
     expect(useCharacterStore.getState().characters).toHaveLength(0);
   });
 
-  it('clamps starting hit points to 11 (1d8 + +3 bonus)', () => {
+  it('caps hit points at 8 without a bonus', () => {
     const { nav } = makeNav<CreateProps['navigation']>();
     let tree!: TestRenderer.ReactTestRenderer;
     act(() => {
@@ -223,7 +223,7 @@ describe('character creation flow', () => {
     }
 
     const up = findByLabel(tree.root, 'Увеличить МАКСИМУМ ХИТОВ');
-    for (let i = 0; i < 13; i += 1) {
+    for (let i = 0; i < 8; i += 1) {
       act(() => up.props.onPress());
     }
 
@@ -231,8 +231,42 @@ describe('character creation flow', () => {
       tree.root.findAll(
         node => node.props?.children === value && typeof node.type === 'string',
       );
+    expect(rendered('+8')).not.toHaveLength(0);
+    expect(rendered('+9')).toHaveLength(0);
+    expect(collectText(tree.root)).not.toContain('Стартовый бонус добавил');
+  });
+
+  it('grants +3 hit points and a highlighted hint on a negative ability sum', () => {
+    const { nav } = makeNav<CreateProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CreateScreen navigation={nav} route={{ key: 'k', name: 'Create' }} />,
+      );
+    });
+
+    const downBody = findByLabel(tree.root, 'Уменьшить ТЕЛ — ТЕЛО');
+    for (let i = 0; i < 5; i += 1) {
+      act(() => downBody.props.onPress());
+    }
+
+    for (let i = 0; i < 4; i += 1) {
+      press(tree.root, 'ДАЛЬШЕ');
+    }
+
+    const up = findByLabel(tree.root, 'Увеличить МАКСИМУМ ХИТОВ');
+    for (let i = 0; i < 13; i += 1) {
+      act(() => up.props.onPress());
+    }
+
+    const text = collectText(tree.root);
+    const rendered = (value: string) =>
+      tree.root.findAll(
+        node => node.props?.children === value && typeof node.type === 'string',
+      );
     expect(rendered('+11')).not.toHaveLength(0);
     expect(rendered('+12')).toHaveLength(0);
+    expect(text).toContain('Стартовый бонус добавил');
   });
 });
 

@@ -134,23 +134,26 @@ export default function CreateScreen({ navigation }: Props) {
     [],
   );
 
-  const finish = useCallback(() => {
-    if (!draft.name.trim()) {
-      Alert.alert('Нужно имя', 'Дайте персонажу имя, чтобы создать лист.');
-      return;
-    }
-    const id = addCharacter({
-      ...draft,
-      hp: draft.hpMax > 0 ? draft.hpMax : draft.hp,
-    });
-    navigation.replace('Character', { id });
-  }, [addCharacter, draft, navigation]);
-
   const sumOfAbilities = useMemo(
     () => abilitySum(draft.abilities),
     [draft.abilities],
   );
   const needsBonus = sumOfAbilities < 0;
+  const hpBonus = needsBonus ? 3 : 0;
+
+  const finish = useCallback(() => {
+    if (!draft.name.trim()) {
+      Alert.alert('Нужно имя', 'Дайте персонажу имя, чтобы создать лист.');
+      return;
+    }
+    const maxHp = draft.hpMax + (needsBonus ? 3 : 0);
+    const id = addCharacter({
+      ...draft,
+      hpMax: maxHp,
+      hp: maxHp,
+    });
+    navigation.replace('Character', { id });
+  }, [addCharacter, draft, navigation, needsBonus]);
 
   return (
     <Screen>
@@ -425,19 +428,31 @@ export default function CreateScreen({ navigation }: Props) {
             <SectionTitle
               index="ШАГ 5"
               title="ХИТЫ И ЗАЩИТА"
-              subtitle="Максимум хитов 1d8 · стартовый бонус +3 ОЗ · защита 12+ЛОВ · лечение 1d8+ТЕЛ"
+              subtitle="Максимум хитов 1d8 · защита 12+ЛОВ · лечение 1d8+ТЕЛ"
             />
             <NumberStepper
               label="МАКСИМУМ ХИТОВ"
-              value={draft.hpMax}
-              onChange={value => patch({ hpMax: value, hp: value })}
-              min={1}
-              max={11}
+              value={draft.hpMax + hpBonus}
+              onChange={value => {
+                const raw = Math.max(1, Math.min(8, value - hpBonus));
+                patch({ hpMax: raw, hp: raw });
+              }}
+              min={1 + hpBonus}
+              max={8 + hpBonus}
               big
             />
+            {needsBonus ? (
+              <View style={styles.bonusBanner}>
+                <Text style={styles.bonusBannerText}>
+                  Сумма способностей {sumOfAbilities} — отрицательная. Стартовый
+                  бонус добавил{' '}
+                  <Text style={styles.bonusBannerAccent}>+3 к ОЗ</Text>.
+                </Text>
+              </View>
+            ) : null}
             <Text style={styles.help}>
-              Если не бросать кубик, лист стартует с {DEFAULT_HP} хитами. Хиты
-              из стартового бонуса «+3 к ОЗ» прибавьте сами — итого до 11.
+              Если не бросать кубик, лист стартует с {DEFAULT_HP} хитами
+              {needsBonus ? ` плюс ${hpBonus} за стартовый бонус` : ''}.
             </Text>
             <Button
               title="БРОСИТЬ 1d8"
@@ -707,6 +722,24 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   spacer: { height: spacing.md },
   help: { color: colors.textDim, fontSize: font.small, lineHeight: 18 },
+  bonusBanner: {
+    borderWidth: 1,
+    borderColor: colors.violet,
+    backgroundColor: 'rgba(155, 93, 229, 0.12)',
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  bonusBannerText: {
+    color: colors.text,
+    fontSize: font.small,
+    lineHeight: 18,
+  },
+  bonusBannerAccent: {
+    color: colors.violet,
+    fontWeight: '800',
+  },
   sum: {
     color: colors.yellow,
     fontSize: font.body,
