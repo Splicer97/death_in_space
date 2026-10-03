@@ -4,7 +4,7 @@ import {
   useCharacterStore,
 } from '../src/store/characterStore';
 import {storage} from '../src/store/storage';
-import {STARTING_HUBS} from '../src/types';
+import {STARTING_HUBS, itemWeight} from '../src/types';
 import {performRoll, rollAbilityValue} from '../src/utils/dice';
 
 describe('character store', () => {
@@ -125,6 +125,211 @@ describe('character store', () => {
 
     expect(restored.getState().characters).toHaveLength(1);
     expect(restored.getState().characters[0].name).toBe('Из хранилища');
+  });
+});
+
+describe('storage migration', () => {
+  beforeEach(() => {
+    storage.clearAll();
+    useCharacterStore.setState({
+      characters: [],
+      activeId: null,
+      hub: null,
+      undoCharacter: null,
+      undoHub: null,
+    });
+  });
+
+  it('converts a v1 snapshot into the v4 shape', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              notes: 'Долг за груз',
+              smallItems: 'Компонент\nЗапчасти',
+              items: [{id: 'i1', name: 'Детектор', condition: 3}],
+              weapons: [
+                {name: 'Пистолет', damage: '1d6', uses: 4, condition: 2},
+              ],
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 1,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    const [character] = restored.getState().characters;
+    expect(character.noteGroups).toEqual([
+      {id: 'g0', title: 'Общие', text: 'Долг за груз'},
+    ]);
+    expect(character.smallItems).toEqual([
+      {name: 'Компонент', count: 1},
+      {name: 'Запчасти', count: 1},
+    ]);
+    expect(character.items).toEqual([
+      {id: 'i1', name: 'Детектор', condition: 3, weight: 1},
+    ]);
+    expect(character.weapons[0]).toEqual({
+      name: 'Пистолет',
+      damage: '1d6',
+      uses: 4,
+      condition: 2,
+      ammo: '',
+    });
+    expect(character.weapons[1].ammo).toBe('');
+    expect(
+      JSON.parse(storage.getString('characters') as string).version,
+    ).toBe(4);
+  });
+
+  it('keeps a single-line v1 smallItems as one entry', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [{id: 'a', name: 'Вейн', smallItems: 'Кружка'}],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 1,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    expect(restored.getState().characters[0].smallItems).toEqual([
+      {name: 'Кружка', count: 1},
+    ]);
+  });
+
+  it('upgrades v2 string-list small items and fills weight and ammo', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              smallItems: ['Кружка'],
+              items: [{id: 'i1', name: 'Нож', condition: 2}],
+              weapons: [{name: 'Мачете', damage: '1d8'}],
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 2,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    const [character] = restored.getState().characters;
+    expect(character.smallItems).toEqual([{name: 'Кружка', count: 1}]);
+    expect(itemWeight(character.items[0])).toBe(1);
+    expect(character.items[0].weight).toBe(1);
+    expect(character.weapons[0].ammo).toBe('');
+  });
+
+  it('keeps v3 small items with their counts', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              smallItems: [
+                {name: 'Шоколадный батончик', count: 3},
+                {name: 'Кружка', count: 1},
+              ],
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 3,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    expect(restored.getState().characters[0].smallItems).toEqual([
+      {name: 'Шоколадный батончик', count: 3},
+      {name: 'Кружка', count: 1},
+    ]);
+  });
+
+  it('migrates a v3 notes string into one note group', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              notes: 'Цели: отдать долг',
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 3,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    expect(restored.getState().characters[0].noteGroups).toEqual([
+      {id: 'g0', title: 'Общие', text: 'Цели: отдать долг'},
+    ]);
+  });
+
+  it('keeps multiple note groups untouched', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              noteGroups: [
+                {id: 'n1', title: 'Цели', text: 'Отдать долг'},
+                {id: 'n2', title: 'Мастеру', text: 'Нужен нож'},
+              ],
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 4,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    expect(restored.getState().characters[0].noteGroups).toEqual([
+      {id: 'n1', title: 'Цели', text: 'Отдать долг'},
+      {id: 'n2', title: 'Мастеру', text: 'Нужен нож'},
+    ]);
   });
 });
 

@@ -17,10 +17,22 @@ export type OriginKey =
   | 'velocityCursed'
   | 'void';
 
+export interface NoteGroup {
+  id: string;
+  title: string;
+  text: string;
+}
+
 export interface Item {
   id: string;
   name: string;
   condition: number;
+  weight?: number;
+}
+
+export interface SmallItem {
+  name: string;
+  count: number;
 }
 
 export interface Weapon {
@@ -28,6 +40,7 @@ export interface Weapon {
   damage: string;
   uses: number;
   condition: number;
+  ammo?: string;
 }
 
 export interface Armor {
@@ -67,7 +80,7 @@ export interface Character {
   lifeSupport: number;
 
   items: Item[];
-  smallItems: string;
+  smallItems: SmallItem[];
   weapons: [Weapon, Weapon];
   armor: Armor | null;
   holos: number;
@@ -77,7 +90,7 @@ export interface Character {
   trinket: string;
   startingBonus: string;
 
-  notes: string;
+  noteGroups: NoteGroup[];
 }
 
 export type CharacterDraft = Omit<Character, 'id' | 'createdAt' | 'updatedAt'>;
@@ -211,6 +224,14 @@ export function energyUsed(modules: InstalledModule[]): number {
 
 export function energyOverdrawn(modules: InstalledModule[], output: number): boolean {
   return energyUsed(modules) > output;
+}
+
+export function itemWeight(item: Item): number {
+  return Math.max(0, Math.round(item.weight ?? 1));
+}
+
+export function itemsUsed(items: Item[]): number {
+  return items.reduce((sum, item) => sum + itemWeight(item), 0);
 }
 
 export function itemSlots(body: number): number {

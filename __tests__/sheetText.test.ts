@@ -20,10 +20,14 @@ function sampleCharacter(): Character {
     background: 'Лунный преступник',
     trait: 'Неудержимый',
     drive: 'Месть',
-    notes: 'Ищет брата',
+    noteGroups: [{id: 'g1', title: 'Цели', text: 'Ищет брата'}],
     items: [
       {id: 'i1', name: 'Дробовик', condition: 3},
       {id: 'i2', name: 'Плазменный нож', condition: 2},
+    ],
+    smallItems: [
+      {name: 'Кружка', count: 1},
+      {name: 'Шоколадный батончик', count: 3},
     ],
   };
 }
@@ -35,6 +39,12 @@ describe('character sheet export', () => {
     expect(text).toContain('Вейн');
     expect(text).toContain('Прозвище: Искра');
     expect(text).toContain('Аня');
+  });
+
+  it('lists small items with their counts', () => {
+    const text = characterToText(sampleCharacter());
+
+    expect(text).toContain('Мелочи: Кружка, Шоколадный батончик ×3');
   });
 
   it('signs abilities and shows health and defense', () => {
@@ -55,11 +65,12 @@ describe('character sheet export', () => {
     expect(text).toContain('Слоты предметов: 13/13');
   });
 
-  it('keeps currency in гало and notes', () => {
+  it('keeps currency and note groups', () => {
     const text = characterToText(sampleCharacter());
 
     expect(text).toContain('Гало: 350');
     expect(text).toContain('Долг: 500');
+    expect(text).toContain('ЗАМЕТКИ — Цели');
     expect(text).toContain('Ищет брата');
   });
 
@@ -67,7 +78,7 @@ describe('character sheet export', () => {
     const text = characterToText({
       ...sampleCharacter(),
       name: 'Пустой',
-      notes: '',
+      noteGroups: [],
       background: '',
       items: [],
     });

@@ -11,7 +11,7 @@ import {
 } from '../types';
 
 export const BACKUP_APP = 'death-in-space';
-export const BACKUP_VERSION = 1;
+export const BACKUP_VERSION = 3;
 
 export interface Backup {
   app: typeof BACKUP_APP;
@@ -59,11 +59,37 @@ function recordList(value: unknown): Raw[] {
   return value.filter(isRaw);
 }
 
+function smallItemList(value: unknown): Character['smallItems'] {
+  const collect = (name: unknown, amount: unknown) => {
+    const trimmed = text(name, '').trim();
+    const total = Math.max(1, count(amount, 1)) || 1;
+    return trimmed ? {name: trimmed, count: total} : null;
+  };
+  if (Array.isArray(value)) {
+    return value
+      .map(entry => {
+        if (typeof entry === 'string') {
+          return collect(entry, 1);
+        }
+        return isRaw(entry) ? collect(entry.name, entry.count) : null;
+      })
+      .filter((entry): entry is Character['smallItems'][number] => entry !== null);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return value
+      .split(/\r?\n+/)
+      .map(entry => collect(entry, 1))
+      .filter((entry): entry is Character['smallItems'][number] => entry !== null);
+  }
+  return [];
+}
+
 function sanitizeItem(raw: Raw): Item {
   return {
     id: text(raw.id) || newId(),
     name: text(raw.name),
     condition: count(raw.condition),
+    weight: count(raw.weight, 1),
   };
 }
 
@@ -76,6 +102,7 @@ function sanitizeWeapon(raw: Raw | undefined, fallback: Weapon): Weapon {
     damage: text(raw.damage),
     uses: count(raw.uses),
     condition: count(raw.condition),
+    ammo: text(raw.ammo),
   };
 }
 
@@ -129,7 +156,7 @@ function sanitizeCharacter(raw: Raw): Character {
     voidCorruption: textList(raw.voidCorruption),
     lifeSupport: count(raw.lifeSupport, base.lifeSupport),
     items: recordList(raw.items).map(sanitizeItem),
-    smallItems: text(raw.smallItems),
+    smallItems: smallItemList(raw.smallItems),
     weapons: [
       sanitizeWeapon(weapons[0], base.weapons[0]),
       sanitizeWeapon(weapons[1], base.weapons[1]),
@@ -140,8 +167,30 @@ function sanitizeCharacter(raw: Raw): Character {
     startingKit: text(raw.startingKit),
     trinket: text(raw.trinket),
     startingBonus: text(raw.startingBonus),
-    notes: text(raw.notes),
+    noteGroups: noteGroupList(raw.noteGroups ?? raw.notes),
   };
+}
+
+function noteGroupList(value: unknown): Character['noteGroups'] {
+  if (Array.isArray(value)) {
+    return value
+      .map((group, index) => {
+        if (!isRaw(group)) {
+          return null;
+        }
+        const title = text(group.title).trim();
+        return {
+          id: text(group.id) || `g${index}`,
+          title: title || 'Без названия',
+          text: text(group.text),
+        };
+      })
+      .filter((group): group is Character['noteGroups'][number] => group !== null);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return [{ id: 'g0', title: 'Общие', text: value }];
+  }
+  return [];
 }
 
 function sanitizeModule(raw: Raw): InstalledModule {

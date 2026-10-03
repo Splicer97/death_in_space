@@ -2,6 +2,8 @@ module.exports = {
   preset: '@react-native/jest-preset',
   moduleNameMapper: {
     '^react-native-mmkv$': '<rootDir>/__mocks__/react-native-mmkv.ts',
+    '^react-native-keyboard-controller(?:/lib/commonjs/components/KeyboardAwareScrollView)?$':
+      '<rootDir>/__mocks__/react-native-keyboard-controller.tsx',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(?:@react-native|react-native|react-native-screens|react-native-safe-area-context|@react-navigation)/)',

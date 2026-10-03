@@ -1,9 +1,9 @@
 import React from 'react';
-import {StatusBar, StyleSheet, View} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import { StatusBar, StyleSheet, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import RootNavigator from './src/navigation/RootNavigator';
-import {colors} from './src/theme';
+import { colors } from './src/theme';
 
 export default function App() {
   return (
@@ -17,5 +17,5 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  root: {flex: 1, backgroundColor: colors.bg},
+  root: { flex: 1, backgroundColor: colors.bg },
 });

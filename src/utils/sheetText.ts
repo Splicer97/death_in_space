@@ -26,6 +26,11 @@ function moduleLine(item: InstalledModule): string {
   return `• ${item.name} — ${item.energy} ВМ`;
 }
 
+function weaponLine(label: string, weapon: Character['weapons'][0]): string {
+  const body = `${weapon.name} (${weapon.damage}), состояние ${weapon.condition}/${weapon.uses}`;
+  return line(label, weapon.ammo ? `${body}, патроны: ${weapon.ammo}` : body);
+}
+
 export function characterToText(character: Character): string {
   const origin = character.origin ? findOrigin(character.origin) : null;
   const blocks = [
@@ -60,9 +65,11 @@ export function characterToText(character: Character): string {
     section('СНАРЯЖЕНИЕ', [
       line('Слоты предметов', `${availableSlots(character.abilities.body, character.armor)}/${itemSlots(character.abilities.body)}`),
       ...character.items.map(item => `• ${item.name} — состояние ${item.condition}`),
-      line('Мелочи', character.smallItems),
-      line('Оружие 1', `${character.weapons[0].name} (${character.weapons[0].damage}), состояние ${character.weapons[0].condition}/${character.weapons[0].uses}`),
-      line('Оружие 2', `${character.weapons[1].name} (${character.weapons[1].damage}), состояние ${character.weapons[1].condition}/${character.weapons[1].uses}`),
+      line('Мелочи', character.smallItems.map(item =>
+        item.count > 1 ? `${item.name} ×${item.count}` : item.name,
+      ).join(', ')),
+      weaponLine('Оружие 1', character.weapons[0]),
+      weaponLine('Оружие 2', character.weapons[1]),
       character.armor
         ? `Броня: ${character.armor.type} (УЗ +${character.armor.drBonus}${
             character.armor.protectsAgainst
@@ -80,7 +87,10 @@ export function characterToText(character: Character): string {
       line('Безделушка', character.trinket),
       line('Бонус', character.startingBonus),
     ]),
-    section('ЗАМЕТКИ', [character.notes]),
+    section('ЗАМЕТКИ', character.noteGroups.flatMap(group => [
+      group.title.trim() ? `ЗАМЕТКИ — ${group.title.trim()}` : 'ЗАМЕТКИ',
+      group.text,
+    ])),
   ];
 
   return blocks.filter(Boolean).join('\n\n');

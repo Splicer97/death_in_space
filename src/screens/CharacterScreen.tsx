@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
 
 import {
   Button,
@@ -24,9 +25,12 @@ import {
   SectionTitle,
 } from '../components/ui';
 import { Track } from '../components/Track';
+import { TablePicker } from '../components/TablePicker';
 import { ARMOR_PRESETS } from '../data/armor';
-import { findOrigin } from '../data/origins';
+import { findOrigin, ORIGINS } from '../data/origins';
 import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../data/mutations';
+import { DRIVES, LOOKS, PAST_ALLEGIANCES, TRAITS } from '../data/tables';
+import type { TableEntry } from '../data/tables';
 import {
   emptyCharacter,
   newId,
@@ -46,6 +50,8 @@ import {
   defenseRating,
   availableSlots,
   itemSlots,
+  itemWeight,
+  itemsUsed,
   LIFE_SUPPORT_STEPS,
   MAX_VOID_POINTS,
   MAX_WEAPON_CONDITION,
@@ -67,6 +73,14 @@ export default function CharacterScreen({ navigation, route }: Props) {
   const removeCharacter = useCharacterStore(state => state.removeCharacter);
   const [tab, setTab] = useState<0 | 1 | 2>(0);
   const [showMutations, setShowMutations] = useState(false);
+  const [showCorruptions, setShowCorruptions] = useState(false);
+  const [tablePicker, setTablePicker] = useState<null | {
+    title: string;
+    die: string;
+    entries: TableEntry[];
+    current: string;
+    onSelect: (text: string) => void;
+  }>(null);
 
   const share = useCallback(() => {
     if (!character) {
@@ -105,7 +119,8 @@ export default function CharacterScreen({ navigation, route }: Props) {
   const dr = defenseRating(character.abilities.dexterity, character.armor);
   const totalSlots = itemSlots(character.abilities.body);
   const slots = availableSlots(character.abilities.body, character.armor);
-  const overloaded = character.items.length > slots;
+  const usedSlots = itemsUsed(character.items);
+  const overloaded = usedSlots > slots;
 
   return (
     <Screen>
@@ -182,9 +197,10 @@ export default function CharacterScreen({ navigation, route }: Props) {
         ))}
       </View>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={12}
       >
         {tab === 0 ? (
           <>
@@ -265,6 +281,26 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 min={0}
                 max={999}
               />
+              <Divider />
+              <SectionTitle
+                index="3"
+                title="СОВЕРШЕНСТВОВАНИЕ"
+                subtitle="Стр. 64 · каждый «да» сессии = 1 очко опыта"
+              />
+              <KeyValue label="Способность +1 (максимум +1)" value="5 XP" />
+              <KeyValue
+                label="Способность +1 (+2 и выше)"
+                value="3 × желаемое значение"
+              />
+              <KeyValue label="Максимум ОЗ +1d4" value="5 XP" />
+              <KeyValue
+                label="Случайная мутация (−1 к способности)"
+                value="15 XP"
+              />
+              <KeyValue
+                label="Преимущество происхождения (макс. 2)"
+                value="15 XP"
+              />
               <Field
                 label="ИМЯ"
                 value={character.name}
@@ -286,10 +322,34 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 onChangeText={pastAllegiance => set({ pastAllegiance })}
                 multiline
               />
+              <SelectFromTable
+                label="БЫВШАЯ ПРЕДАННОСТЬ (d6)"
+                onOpen={() =>
+                  setTablePicker({
+                    title: 'БЫВШАЯ ПРЕДАННОСТЬ',
+                    die: 'd6',
+                    entries: PAST_ALLEGIANCES,
+                    current: character.pastAllegiance,
+                    onSelect: pastAllegiance => set({ pastAllegiance }),
+                  })
+                }
+              />
               <Field
                 label="ЧЕРТА (d20)"
                 value={character.trait}
                 onChangeText={trait => set({ trait })}
+              />
+              <SelectFromTable
+                label="ЧЕРТА (d20)"
+                onOpen={() =>
+                  setTablePicker({
+                    title: 'ЧЕРТА',
+                    die: 'd20',
+                    entries: TRAITS,
+                    current: character.trait,
+                    onSelect: trait => set({ trait }),
+                  })
+                }
               />
               <Field
                 label="СТИМУЛ (d20)"
@@ -297,16 +357,39 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 onChangeText={drive => set({ drive })}
                 multiline
               />
+              <SelectFromTable
+                label="СТИМУЛ (d20)"
+                onOpen={() =>
+                  setTablePicker({
+                    title: 'СТИМУЛ',
+                    die: 'd20',
+                    entries: DRIVES,
+                    current: character.drive,
+                    onSelect: drive => set({ drive }),
+                  })
+                }
+              />
               <Field
                 label="ВНЕШНОСТЬ (d20)"
                 value={character.looks}
                 onChangeText={looks => set({ looks })}
                 multiline
               />
+              <SelectFromTable
+                label="ВНЕШНОСТЬ (d20)"
+                onOpen={() =>
+                  setTablePicker({
+                    title: 'ВНЕШНОСТЬ',
+                    die: 'd20',
+                    entries: LOOKS,
+                    current: character.looks,
+                    onSelect: looks => set({ looks }),
+                  })
+                }
+              />
               {origin ? (
                 <>
                   <Divider />
-                  <Text style={styles.subLabel}>ПРЕДЫСТОРИЯ</Text>
                   <Text style={styles.body}>{origin.name}</Text>
                   <Text style={styles.dim}>{origin.description}</Text>
                   <Text style={[styles.subLabel, { marginTop: spacing.md }]}>
@@ -340,8 +423,37 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       </Pressable>
                     );
                   })}
+                  <View style={styles.row}>
+                    <Button
+                      title="СМЕНИТЬ ПРОИСХОЖДЕНИЕ"
+                      variant="ghost"
+                      onPress={() => set({ origin: null, originBenefits: [] })}
+                      style={styles.wideButton}
+                    />
+                  </View>
                 </>
-              ) : null}
+              ) : (
+                <>
+                  <Divider />
+                  <Text style={styles.subLabel}>ПРОИСХОЖДЕНИЕ</Text>
+                  <View style={styles.row}>
+                    {ORIGINS.map(item => (
+                      <Chip
+                        key={item.key}
+                        label={item.name}
+                        selected={character.origin === item.key}
+                        onPress={() =>
+                          set({
+                            origin: item.key,
+                            originBenefits: [],
+                          })
+                        }
+                      />
+                    ))}
+                  </View>
+                  <Hint text="Выберите происхождение — выгоды появятся ниже." />
+                </>
+              )}
             </Card>
 
             <Card>
@@ -507,6 +619,12 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   }}
                   style={styles.wideButton}
                 />
+                <Button
+                  title="ИЗ СПИСКА"
+                  variant="ghost"
+                  onPress={() => setShowCorruptions(true)}
+                  style={styles.wideButton}
+                />
               </View>
               <AddRow
                 placeholder="Своя порча пустоты…"
@@ -531,49 +649,50 @@ export default function CharacterScreen({ navigation, route }: Props) {
               <SectionTitle
                 index="3"
                 title="ЛИЧНОЕ ИМУЩЕСТВО"
-                subtitle={`${character.items.length}/${slots} слотов${
+                subtitle={`${usedSlots}/${slots} слотов${
                   overloaded ? ' · ПЕРЕГРУЗ' : ''
                 }`}
               />
               {overloaded ? (
                 <Text style={styles.warning}>
-                  {character.items.length} предметов при {slots} свободных —
-                  помеха на все действия.
+                  Занято {usedSlots} слотов при {slots} свободных — помеха на
+                  все действия.
                 </Text>
               ) : null}
               {character.items.map(item => (
-                <View key={item.id} style={styles.itemRow}>
-                  <TextInput
-                    value={item.name}
-                    onChangeText={name =>
-                      set({
-                        items: character.items.map(current =>
-                          current.id === item.id
-                            ? { ...current, name }
-                            : current,
-                        ),
-                      })
-                    }
-                    placeholder="Предмет"
-                    placeholderTextColor={colors.textFaint}
-                    style={[styles.itemInput, styles.flex]}
-                  />
-                  <View style={styles.conditionBox}>
-                    {[1, 2, 3, 4, 5].map(level => (
-                      <Pressable
-                        key={level}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Состояние ${level}`}
-                        onPress={() =>
-                          set({
-                            items: character.items.map(current =>
-                              current.id === item.id
-                                ? {
-                                    ...current,
-                                    condition:
-                                      level === item.condition ? 0 : level,
-                                  }
-                                : current,
+                <View key={item.id} style={styles.itemBlock}>
+                  <View style={styles.itemRow}>
+                    <TextInput
+                      value={item.name}
+                      onChangeText={name =>
+                        set({
+                          items: character.items.map(current =>
+                            current.id === item.id
+                              ? { ...current, name }
+                              : current,
+                          ),
+                        })
+                      }
+                      placeholder="Предмет"
+                      placeholderTextColor={colors.textFaint}
+                      style={[styles.itemInput, styles.flex]}
+                    />
+                    <View style={styles.conditionBox}>
+                      {[1, 2, 3, 4, 5].map(level => (
+                        <Pressable
+                          key={level}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Состояние ${level}`}
+                          onPress={() =>
+                            set({
+                              items: character.items.map(current =>
+                                current.id === item.id
+                                  ? {
+                                      ...current,
+                                      condition:
+                                        level === item.condition ? 0 : level,
+                                    }
+                                  : current,
                             ),
                           })
                         }
@@ -582,22 +701,67 @@ export default function CharacterScreen({ navigation, route }: Props) {
                           item.condition >= level && styles.conditionCellOn,
                         ]}
                       />
-                    ))}
+                      ))}
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Удалить предмет"
+                      onPress={() =>
+                        set({
+                          items: character.items.filter(
+                            current => current.id !== item.id,
+                          ),
+                        })
+                      }
+                      style={styles.removeButton}
+                    >
+                      <Text style={styles.listRemove}>✕</Text>
+                    </Pressable>
                   </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Удалить предмет"
-                    onPress={() =>
-                      set({
-                        items: character.items.filter(
-                          current => current.id !== item.id,
-                        ),
-                      })
-                    }
-                    style={styles.removeButton}
-                  >
-                    <Text style={styles.listRemove}>✕</Text>
-                  </Pressable>
+                  <View style={styles.itemWeight}>
+                    <Text style={styles.itemWeightLabel}>ВЕС</Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Уменьшить вес"
+                      onPress={() =>
+                        set({
+                          items: character.items.map(current =>
+                            current.id === item.id
+                              ? { ...current, weight: Math.max(0, itemWeight(current) - 1) }
+                              : current,
+                          ),
+                        })
+                      }
+                      style={styles.weightButton}
+                    >
+                      <Text style={styles.weightSign}>−</Text>
+                    </Pressable>
+                    <Text style={styles.itemWeightValue}>
+                      {itemWeight(item)}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Увеличить вес"
+                      onPress={() =>
+                        set({
+                          items: character.items.map(current =>
+                            current.id === item.id
+                              ? {
+                                  ...current,
+                                  weight: Math.min(12, itemWeight(current) + 1),
+                                }
+                              : current,
+                          ),
+                        })
+                      }
+                      style={styles.weightButton}
+                    >
+                      <Text style={styles.weightSign}>+</Text>
+                    </Pressable>
+                    <Text style={styles.itemWeightHint}>
+                      слот{itemWeight(item) === 1 ? '' : 'а'}
+                    </Text>
+                  </View>
                 </View>
               ))}
               <Button
@@ -611,19 +775,97 @@ export default function CharacterScreen({ navigation, route }: Props) {
                         id: newId(),
                         name: '',
                         condition: MAX_WEAPON_CONDITION,
+                        weight: 1,
                       },
                     ] as Item[],
                   })
                 }
               />
               <Divider />
-              <Field
-                label="МЕЛКИЕ ПРЕДМЕТЫ (без слотов)"
-                value={character.smallItems}
-                onChangeText={smallItems => set({ smallItems })}
-                multiline
+              <Text style={styles.subLabel}>МЕЛКИЕ ПРЕДМЕТЫ (без слотов)</Text>
+              {character.smallItems.length === 0 ? (
+                <Hint text="Компоненты — 1 слот, запчасти для техники — 5 слотов." />
+              ) : (
+                <View style={styles.smallItemsWrap}>
+                  {character.smallItems.map((item, index) => (
+                    <View
+                      key={`${item.name}-${index}`}
+                      style={styles.smallItemCell}
+                    >
+                      <Text style={styles.smallItemText} numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Меньше: ${item.name}`}
+                        onPress={() =>
+                          set({
+                            smallItems: character.smallItems.map(
+                              (current, itemIndex) =>
+                                itemIndex === index
+                                  ? {
+                                      ...current,
+                                      count: Math.max(1, current.count - 1),
+                                    }
+                                  : current,
+                            ),
+                          })
+                        }
+                        style={styles.smallItemStepper}
+                      >
+                        <Text style={styles.smallItemCountSign}>−</Text>
+                      </Pressable>
+                      <Text style={styles.smallItemCount}>
+                        {item.count}
+                      </Text>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Больше: ${item.name}`}
+                        onPress={() =>
+                          set({
+                            smallItems: character.smallItems.map(
+                              (current, itemIndex) =>
+                                itemIndex === index
+                                  ? {
+                                      ...current,
+                                      count: Math.min(999, current.count + 1),
+                                    }
+                                  : current,
+                            ),
+                          })
+                        }
+                        style={styles.smallItemStepper}
+                      >
+                        <Text style={styles.smallItemCountSign}>+</Text>
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Удалить: ${item.name}`}
+                        onPress={() =>
+                          set({
+                            smallItems: character.smallItems.filter(
+                              (_, itemIndex) => itemIndex !== index,
+                            ),
+                          })
+                        }
+                      >
+                        <Text style={styles.smallItemRemove}>✕</Text>
+                      </Pressable>
+                    </View>
+                  ))}
+                </View>
+              )}
+              <AddRow
+                placeholder="Мелкий предмет…"
+                onAdd={text => {
+                  const name = text.trim();
+                  if (name) {
+                    set({
+                      smallItems: [...character.smallItems, {name, count: 1}],
+                    });
+                  }
+                }}
               />
-              <Hint text="Компоненты — 1 слот, запчасти для техники — 5 слотов." />
             </Card>
 
             <Card>
@@ -676,6 +918,19 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       keyboardType="number-pad"
                     />
                   </View>
+                  <Field
+                    label="ПАТРОНЫ"
+                    value={weapon.ammo ?? ''}
+                    onChangeText={ammo =>
+                      set({
+                        weapons: replaceWeapon(character.weapons, index, {
+                          ...weapon,
+                          ammo,
+                        }),
+                      })
+                    }
+                    placeholder="1d4×10 · 40/40"
+                  />
                   <Text style={styles.subLabel}>СОСТОЯНИЕ</Text>
                   <Track
                     value={weapon.condition}
@@ -804,20 +1059,82 @@ export default function CharacterScreen({ navigation, route }: Props) {
 
         {tab === 2 ? (
           <>
+            <SectionTitle
+              index="4"
+              title="ЗАМЕТКИ"
+              subtitle="Группы записей: цели, связи, долги, детали"
+            />
+            {character.noteGroups.map((group, index) => (
+              <Card key={group.id}>
+                <Field
+                  label="НАЗВАНИЕ ГРУППЫ"
+                  value={group.title}
+                  onChangeText={title =>
+                    set({
+                      noteGroups: character.noteGroups.map((entry, i) =>
+                        i === index ? {...entry, title} : entry,
+                      ),
+                    })
+                  }
+                  placeholder="Цели, связи, долги…"
+                />
+                <Field
+                  label="ЗАМЕТКИ"
+                  value={group.text}
+                  onChangeText={text =>
+                    set({
+                      noteGroups: character.noteGroups.map((entry, i) =>
+                        i === index ? {...entry, text} : entry,
+                      ),
+                    })
+                  }
+                  multiline
+                  placeholder="Что запомнить по этой группе…"
+                  style={styles.tall}
+                />
+                <Button
+                  title="УДАЛИТЬ ГРУППУ"
+                  variant="danger"
+                  onPress={() =>
+                    Alert.alert(
+                      'Удалить группу?',
+                      `Группа «${group.title || 'Без названия'}» будет удалена.`,
+                      [
+                        {text: 'Отмена', style: 'cancel'},
+                        {
+                          text: 'Удалить',
+                          style: 'destructive',
+                          onPress: () =>
+                            set({
+                              noteGroups: character.noteGroups.filter(
+                                (_, i) => i !== index,
+                              ),
+                            }),
+                        },
+                      ],
+                    )
+                  }
+                />
+              </Card>
+            ))}
             <Card>
-              <SectionTitle
-                index="4"
-                title="ЗАМЕТКИ"
-                subtitle="Всё, что не поместилось выше"
+              <AddRow
+                placeholder="Название группы заметок…"
+                onAdd={title => {
+                  const trimmed = title.trim();
+                  if (trimmed) {
+                    set({
+                      noteGroups: [
+                        ...character.noteGroups,
+                        {id: newId(), title: trimmed, text: ''},
+                      ],
+                    });
+                  }
+                }}
               />
-              <Field
-                label="ЗАМЕТКИ ИГРОКА"
-                value={character.notes}
-                onChangeText={notes => set({ notes })}
-                multiline
-                placeholder="Цели, связи, долги перед мастером, важные предметы…"
-                style={styles.tall}
-              />
+              {character.noteGroups.length === 0 ? (
+                <Hint text="Заметок пока нет — добавьте первую группу, например «Цели» или «Долги мастеру»." />
+              ) : null}
             </Card>
             <Card>
               <SectionTitle title="СТАРТОВОЕ СНАРЯЖЕНИЕ" />
@@ -879,7 +1196,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
             />
           </>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {showMutations ? (
         <View style={styles.modalBackdrop}>
@@ -930,6 +1247,69 @@ export default function CharacterScreen({ navigation, route }: Props) {
           </View>
         </View>
       ) : null}
+
+      {tablePicker ? (
+        <TablePicker
+          title={tablePicker.title}
+          die={tablePicker.die}
+          entries={tablePicker.entries}
+          value={tablePicker.current}
+          onSelect={tablePicker.onSelect}
+          onClose={() => setTablePicker(null)}
+        />
+      ) : null}
+      {showCorruptions ? (
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modal}>
+            <ScrollView>
+              <Text style={styles.modalTitle}>ПОРЧА ПУСТОТЫ</Text>
+              <Text style={styles.modalSub}>
+                Постоянные последствия провалов. Дубли по ролям невозможны.
+              </Text>
+              {VOID_CORRUPTIONS.map(corruption => {
+                const active = character.voidCorruption.some(
+                  item => item === `${corruption.id}. ${corruption.text}`,
+                );
+                return (
+                  <Pressable
+                    key={corruption.id}
+                    accessibilityRole="button"
+                    onPress={() =>
+                      set({
+                        voidCorruption: active
+                          ? character.voidCorruption.filter(
+                              item => item !== `${corruption.id}. ${corruption.text}`,
+                            )
+                          : [
+                              ...character.voidCorruption,
+                              `${corruption.id}. ${corruption.text}`,
+                            ],
+                      })
+                    }
+                    style={[
+                      styles.mutationRow,
+                      active && styles.mutationRowActive,
+                    ]}
+                  >
+                    <Text style={styles.mutationRoll}>{corruption.id}</Text>
+                    <View style={styles.flex}>
+                      <Text
+                        style={[
+                          styles.mutationName,
+                          active && { color: colors.yellow },
+                        ]}
+                      >
+                        {corruption.text}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+            <Button title="ЗАКРЫТЬ" onPress={() => setShowCorruptions(false)} />
+          </View>
+        </View>
+      ) : null}
     </Screen>
   );
 }
@@ -942,6 +1322,24 @@ function replaceWeapon(
   const copy: Character['weapons'] = [weapons[0], weapons[1]];
   copy[index] = next;
   return copy;
+}
+
+function SelectFromTable({
+  label,
+  onOpen,
+}: {
+  label: string;
+  onOpen: () => void;
+}) {
+  return (
+    <View style={styles.selectRow}>
+      <Chip
+        label="ИЗ ТАБЛИЦЫ"
+        accessibilityLabel={`Таблица: ${label}`}
+        onPress={onOpen}
+      />
+    </View>
+  );
 }
 
 function AddRow({
@@ -1180,6 +1578,98 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: spacing.sm,
+  },
+  itemBlock: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  itemWeight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
+  selectRow: {
+    alignSelf: 'flex-start',
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  itemWeightLabel: {
+    color: colors.textDim,
+    fontSize: font.tiny,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginRight: spacing.md,
+  },
+  weightButton: {
+    width: 30,
+    height: 26,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  weightSign: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  itemWeightValue: {
+    color: colors.yellow,
+    fontSize: font.body,
+    fontWeight: '800',
+    width: 34,
+    textAlign: 'center',
+  },
+  itemWeightHint: {
+    color: colors.textDim,
+    fontSize: font.tiny,
+    marginLeft: spacing.xs,
+  },
+  smallItemsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
+  smallItemCell: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    marginRight: spacing.sm,
+    marginBottom: spacing.sm,
+    maxWidth: '100%',
+  },
+  smallItemText: {
+    color: colors.text,
+    fontSize: font.small,
+    flexShrink: 1,
+    paddingHorizontal: spacing.xs,
+  },
+  smallItemCount: {
+    color: colors.yellow,
+    fontSize: font.small,
+    fontWeight: '800',
+    width: 28,
+    textAlign: 'center',
+  },
+  smallItemStepper: {
+    width: 26,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginHorizontal: 2,
+  },
+  smallItemCountSign: { color: colors.text, fontSize: 14, fontWeight: '800' },
+  smallItemRemove: {
+    color: colors.textFaint,
+    fontSize: font.body,
+    paddingLeft: spacing.sm,
+    paddingRight: spacing.xs,
   },
   itemInput: {
     backgroundColor: colors.surfaceAlt,

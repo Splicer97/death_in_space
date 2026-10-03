@@ -22,7 +22,7 @@ function richCharacter(): Character {
     xp: 3,
     background: 'Беглый',
     trait: 'Хладнокровие',
-    notes: 'Строка\nс переносом',
+    noteGroups: [{id: 'g0', title: 'Общие', text: 'Строка\nс переносом'}],
     portrait: '🛸',
     abilities: {body: 2, dexterity: 1, savvy: 0, tech: -1},
     hp: 3,
@@ -31,12 +31,22 @@ function richCharacter(): Character {
     mutations: ['Дополнительный палец'],
     voidCorruption: ['Эхо'],
     items: [
-      {id: 'item-1', name: 'Детектор', condition: 4},
-      {id: 'item-2', name: 'Кредит', condition: 0},
+      {id: 'item-1', name: 'Детектор', condition: 4, weight: 1},
+      {id: 'item-2', name: 'Кредит', condition: 0, weight: 2},
+    ],
+    smallItems: [
+      {name: 'Компонент', count: 1},
+      {name: 'Шоколадный батончик', count: 3},
     ],
     weapons: [
-      {name: 'Плазменный пистолет', damage: '1d6+1', uses: 4, condition: 3},
-      {name: 'Мачете', damage: '1d8', uses: 3, condition: 1},
+      {
+        name: 'Плазменный пистолет',
+        damage: '1d6+1',
+        uses: 4,
+        condition: 3,
+        ammo: '1d4×10 · 40/40',
+      },
+      {name: 'Мачете', damage: '1d8', uses: 3, condition: 1, ammo: ''},
     ],
     armor: {
       type: 'Скафандр',
@@ -92,7 +102,7 @@ describe('backup export', () => {
     const backup = buildBackup({characters: [], activeId: null, hub: null});
 
     expect(backup.app).toBe('death-in-space');
-    expect(backup.version).toBe(1);
+    expect(backup.version).toBe(3);
     expect(typeof backup.exportedAt).toBe('number');
   });
 
@@ -187,6 +197,7 @@ describe('backup import', () => {
             hp: 'много',
             mutations: ['Эхо', 7, null],
             items: [{id: 'i', name: 'Детектор', condition: 'x'}, 'мусор'],
+            smallItems: 'Кружка\nКлюч',
             weapons: [{name: 'Пистолет'}],
             armor: 'броня',
           },
@@ -202,9 +213,15 @@ describe('backup import', () => {
     const [character] = result.backup.characters;
     expect(character.hp).toBe(0);
     expect(character.mutations).toEqual(['Эхо']);
-    expect(character.items).toEqual([{id: 'i', name: 'Детектор', condition: 0}]);
+    expect(character.items).toEqual([
+      {id: 'i', name: 'Детектор', condition: 0, weight: 1},
+    ]);
+    expect(character.smallItems).toEqual([
+      {name: 'Кружка', count: 1},
+      {name: 'Ключ', count: 1},
+    ]);
     expect(character.weapons[0].name).toBe('Пистолет');
-    expect(character.weapons[1].name).toBe('');
+    expect(character.weapons[0].ammo).toBe('');
     expect(character.armor).toBeNull();
 
     const hub = result.backup.hub as Hub;

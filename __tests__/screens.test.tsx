@@ -9,6 +9,7 @@ import DataScreen from '../src/screens/DataScreen';
 import RosterScreen from '../src/screens/RosterScreen';
 import { emptyCharacter, useCharacterStore } from '../src/store/characterStore';
 import { TRAITS } from '../src/data/tables';
+import { VOID_CORRUPTIONS } from '../src/data/mutations';
 import { STARTING_HUBS } from '../src/types';
 import { storage } from '../src/store/storage';
 import type { RootStackParamList } from '../src/navigation/types';
@@ -373,6 +374,133 @@ describe('character sheet', () => {
     });
   });
 
+  it('sets an origin chosen from the picker', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'КАРБОН');
+
+    const character = useCharacterStore.getState().characters[0];
+    expect(character.origin).toBe('carbon');
+    expect(character.originBenefits).toEqual([]);
+  });
+
+  it('adds an item and grows its weight', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ВЕЩИ');
+    press(tree.root, '+ ПРЕДМЕТ');
+
+    const increase = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Увеличить вес',
+      { deep: true },
+    )[0];
+    expect(increase).toBeDefined();
+    act(() => {
+      increase.props.onPress();
+    });
+
+    const character = useCharacterStore.getState().characters[0];
+    expect(character.items).toHaveLength(1);
+    expect(character.items[0].weight).toBe(2);
+  });
+
+  it('adds a void corruption picked from the list', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ИЗ СПИСКА');
+    press(tree.root, VOID_CORRUPTIONS[0].text);
+
+    const character = useCharacterStore.getState().characters[0];
+    expect(character.voidCorruption).toContain(
+      `1. ${VOID_CORRUPTIONS[0].text}`,
+    );
+  });
+
+  it('shows what can be bought with experience points', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    const texts = JSON.stringify(tree.toJSON());
+    expect(texts).toContain('СОВЕРШЕНСТВОВАНИЕ');
+    expect(texts).toContain('3 × желаемое значение');
+    expect(texts).toContain('Случайная мутация (−1 к способности)');
+    expect(texts).toContain('Преимущество происхождения (макс. 2)');
+    expect(texts).toContain('15 XP');
+  });
+
+  it('grows a small item count with the stepper', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        smallItems: [{name: 'Шоколадный батончик', count: 3}],
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ВЕЩИ');
+    const increase = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Больше: Шоколадный батончик',
+      { deep: true },
+    )[0];
+    expect(increase).toBeDefined();
+    act(() => {
+      increase.props.onPress();
+    });
+
+    expect(useCharacterStore.getState().characters[0].smallItems).toEqual([
+      {name: 'Шоколадный батончик', count: 4},
+    ]);
+  });
+
   it('opens the dice roller', () => {
     const id = useCharacterStore.getState().activeId as string;
     const { nav, calls } = makeNav<CharacterProps['navigation']>();
@@ -453,6 +581,55 @@ describe('character sheet', () => {
       state.characters.find(item => item.id === id)?.name,
     ).toBe('Отменённый');
     confirmSpy.mockRestore();
+  });
+
+  it('adds and removes note groups on the notes tab', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        noteGroups: [{id: 'n1', title: 'Цели', text: 'Отдать долг'}],
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ЗАМЕТКИ');
+    const texts = JSON.stringify(tree.toJSON());
+    expect(texts).toContain('Цели');
+    expect(texts).toContain('Отдать долг');
+
+    const titleField = tree.root.findAll(
+      node =>
+        typeof node.type === 'string' && node.props.placeholder === 'Цели, связи, долги…',
+    )[0];
+    act(() => {
+      titleField.props.onChangeText('Долги');
+    });
+    expect(useCharacterStore.getState().characters[0].noteGroups[0]).toEqual({
+      id: 'n1',
+      title: 'Долги',
+      text: 'Отдать долг',
+    });
+
+    const confirm = jest
+      .spyOn(Alert, 'alert')
+      .mockImplementation((_title, _message, buttons) => {
+        if (Array.isArray(buttons)) {
+          buttons[1].onPress?.();
+        }
+      });
+    pressNth(tree.root, 'УДАЛИТЬ ГРУППУ', 0);
+    expect(useCharacterStore.getState().characters[0].noteGroups).toEqual([]);
+    confirm.mockRestore();
   });
 
   it('renders a fallback when the character is missing', () => {

@@ -6,6 +6,7 @@ import {
 } from 'zustand/middleware';
 
 import { storage } from './storage';
+import { normalizeItems, normalizeNoteGroups, normalizeSmallItems, normalizeWeapons } from '../utils/migrate';
 import type { Character, CharacterDraft, Hub, HubDraft } from '../types';
 
 const mmkvAdapter: StateStorage = {
@@ -45,10 +46,10 @@ export function emptyCharacter(): CharacterDraft {
     voidCorruption: [],
     lifeSupport: 7,
     items: [],
-    smallItems: '',
+    smallItems: [],
     weapons: [
-      { name: '', damage: '', uses: 0, condition: 0 },
-      { name: '', damage: '', uses: 0, condition: 0 },
+      { name: '', damage: '', uses: 0, condition: 0, ammo: '' },
+      { name: '', damage: '', uses: 0, condition: 0, ammo: '' },
     ],
     armor: null,
     holos: 0,
@@ -56,7 +57,7 @@ export function emptyCharacter(): CharacterDraft {
     startingKit: '',
     trinket: '',
     startingBonus: '',
-    notes: '',
+    noteGroups: [],
   };
 }
 
@@ -195,13 +196,37 @@ export function createCharacterStore() {
       }),
       {
         name: 'characters',
-        version: 1,
+        version: 4,
         storage: createJSONStorage(() => mmkvAdapter),
         partialize: state => ({
           characters: state.characters,
           activeId: state.activeId,
           hub: state.hub,
         }),
+        migrate: persisted => {
+          const saved = persisted as {
+            characters?: unknown[];
+          } | null;
+          if (!Array.isArray(saved?.characters)) {
+            return persisted as object;
+          }
+          const blankWeapons = emptyCharacter().weapons;
+          return {
+            ...saved,
+            characters: saved.characters.map(raw => {
+              const character = (raw ?? {}) as Record<string, unknown>;
+              return {
+                ...character,
+                items: normalizeItems(character.items),
+                smallItems: normalizeSmallItems(character.smallItems),
+                weapons: normalizeWeapons(character.weapons, blankWeapons),
+                noteGroups: normalizeNoteGroups(
+                  character.noteGroups ?? character.notes,
+                ),
+              };
+            }),
+          };
+        },
         merge: (persisted, current) => {
           const saved = (persisted ?? {}) as Partial<CharacterStore>;
           return {
