@@ -3,9 +3,9 @@ import {
   emptyCharacter,
   useCharacterStore,
 } from '../src/store/characterStore';
-import {storage} from '../src/store/storage';
-import {STARTING_HUBS, itemWeight} from '../src/types';
-import {performRoll, rollAbilityValue} from '../src/utils/dice';
+import { storage } from '../src/store/storage';
+import { STARTING_HUBS, itemWeight } from '../src/types';
+import { performRoll, rollAbilityValue } from '../src/utils/dice';
 
 describe('character store', () => {
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('character store', () => {
   });
 
   it('creates a character and makes it active', () => {
-    const draft = {...emptyCharacter(), name: 'Вейн'};
+    const draft = { ...emptyCharacter(), name: 'Вейн' };
     const id = useCharacterStore.getState().addCharacter(draft);
     const state = useCharacterStore.getState();
 
@@ -36,20 +36,24 @@ describe('character store', () => {
   it('patches a character without touching the others', () => {
     const first = useCharacterStore
       .getState()
-      .addCharacter({...emptyCharacter(), name: 'Первый'});
-    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Второй'});
+      .addCharacter({ ...emptyCharacter(), name: 'Первый' });
+    useCharacterStore
+      .getState()
+      .addCharacter({ ...emptyCharacter(), name: 'Второй' });
 
-    useCharacterStore.getState().updateCharacter(first, {holos: 42});
+    useCharacterStore.getState().updateCharacter(first, { holos: 42 });
     const state = useCharacterStore.getState();
 
     expect(state.characters.find(item => item.id === first)?.holos).toBe(42);
-    expect(state.characters.find(item => item.name === 'Второй')?.holos).toBe(0);
+    expect(state.characters.find(item => item.name === 'Второй')?.holos).toBe(
+      0,
+    );
   });
 
   it('removes a character and clears the active id', () => {
     const id = useCharacterStore
       .getState()
-      .addCharacter({...emptyCharacter(), name: 'Труп'});
+      .addCharacter({ ...emptyCharacter(), name: 'Труп' });
 
     useCharacterStore.getState().removeCharacter(id);
     const state = useCharacterStore.getState();
@@ -60,7 +64,10 @@ describe('character store', () => {
 
   it('restores a deleted character with the same id', () => {
     const store = useCharacterStore.getState();
-    const id = store.addCharacter({...emptyCharacter(), name: 'Возвращённый'});
+    const id = store.addCharacter({
+      ...emptyCharacter(),
+      name: 'Возвращённый',
+    });
     const snapshot = useCharacterStore.getState().characters[0];
 
     store.removeCharacter(id);
@@ -77,7 +84,7 @@ describe('character store', () => {
 
   it('brings a removed character back through undoRemove', () => {
     const store = useCharacterStore.getState();
-    const id = store.addCharacter({...emptyCharacter(), name: 'Отменённый'});
+    const id = store.addCharacter({ ...emptyCharacter(), name: 'Отменённый' });
     store.removeCharacter(id);
 
     expect(useCharacterStore.getState().undoCharacter?.name).toBe('Отменённый');
@@ -92,7 +99,7 @@ describe('character store', () => {
 
   it('ignores a restore of a character that is still in the roster', () => {
     const store = useCharacterStore.getState();
-    const id = store.addCharacter({...emptyCharacter(), name: 'Дубль'});
+    const id = store.addCharacter({ ...emptyCharacter(), name: 'Дубль' });
     const snapshot = useCharacterStore.getState().characters[0];
 
     store.restoreCharacter(snapshot);
@@ -104,7 +111,7 @@ describe('character store', () => {
   it('writes the state into MMKV', () => {
     useCharacterStore
       .getState()
-      .addCharacter({...emptyCharacter(), name: 'Персистентный'});
+      .addCharacter({ ...emptyCharacter(), name: 'Персистентный' });
 
     const raw = storage.getString('characters');
     expect(raw).toBeDefined();
@@ -116,7 +123,7 @@ describe('character store', () => {
   it('rehydrates from MMKV in a fresh store instance', async () => {
     useCharacterStore
       .getState()
-      .addCharacter({...emptyCharacter(), name: 'Из хранилища'});
+      .addCharacter({ ...emptyCharacter(), name: 'Из хранилища' });
     const raw = storage.getString('characters') as string;
     expect(raw).toContain('Из хранилища');
 
@@ -151,9 +158,9 @@ describe('storage migration', () => {
               name: 'Вейн',
               notes: 'Долг за груз',
               smallItems: 'Компонент\nЗапчасти',
-              items: [{id: 'i1', name: 'Детектор', condition: 3}],
+              items: [{ id: 'i1', name: 'Детектор', condition: 3 }],
               weapons: [
-                {name: 'Пистолет', damage: '1d6', uses: 4, condition: 2},
+                { name: 'Пистолет', damage: '1d6', uses: 4, condition: 2 },
               ],
             },
           ],
@@ -169,14 +176,14 @@ describe('storage migration', () => {
 
     const [character] = restored.getState().characters;
     expect(character.noteGroups).toEqual([
-      {id: 'g0', title: 'Общие', text: 'Долг за груз'},
+      { id: 'g0', title: 'Общие', text: 'Долг за груз' },
     ]);
     expect(character.smallItems).toEqual([
-      {name: 'Компонент', count: 1},
-      {name: 'Запчасти', count: 1},
+      { name: 'Компонент', count: 1 },
+      { name: 'Запчасти', count: 1 },
     ]);
     expect(character.items).toEqual([
-      {id: 'i1', name: 'Детектор', condition: 3, weight: 1},
+      { id: 'i1', name: 'Детектор', condition: 3, weight: 1 },
     ]);
     expect(character.weapons[0]).toEqual({
       name: 'Пистолет',
@@ -187,9 +194,9 @@ describe('storage migration', () => {
       ammo: '',
     });
     expect(character.weapons[1].ammo).toBe('');
-    expect(
-      JSON.parse(storage.getString('characters') as string).version,
-    ).toBe(5);
+    expect(JSON.parse(storage.getString('characters') as string).version).toBe(
+      5,
+    );
   });
 
   it('keeps a single-line v1 smallItems as one entry', async () => {
@@ -197,7 +204,7 @@ describe('storage migration', () => {
       'characters',
       JSON.stringify({
         state: {
-          characters: [{id: 'a', name: 'Вейн', smallItems: 'Кружка'}],
+          characters: [{ id: 'a', name: 'Вейн', smallItems: 'Кружка' }],
           activeId: 'a',
           hub: null,
         },
@@ -209,7 +216,7 @@ describe('storage migration', () => {
     await restored.persist.rehydrate();
 
     expect(restored.getState().characters[0].smallItems).toEqual([
-      {name: 'Кружка', count: 1},
+      { name: 'Кружка', count: 1 },
     ]);
   });
 
@@ -223,8 +230,8 @@ describe('storage migration', () => {
               id: 'a',
               name: 'Вейн',
               smallItems: ['Кружка'],
-              items: [{id: 'i1', name: 'Нож', condition: 2}],
-              weapons: [{name: 'Мачете', damage: '1d8'}],
+              items: [{ id: 'i1', name: 'Нож', condition: 2 }],
+              weapons: [{ name: 'Мачете', damage: '1d8' }],
             },
           ],
           activeId: 'a',
@@ -238,7 +245,7 @@ describe('storage migration', () => {
     await restored.persist.rehydrate();
 
     const [character] = restored.getState().characters;
-    expect(character.smallItems).toEqual([{name: 'Кружка', count: 1}]);
+    expect(character.smallItems).toEqual([{ name: 'Кружка', count: 1 }]);
     expect(itemWeight(character.items[0])).toBe(1);
     expect(character.items[0].weight).toBe(1);
     expect(character.weapons[0].ammo).toBe('');
@@ -254,8 +261,8 @@ describe('storage migration', () => {
               id: 'a',
               name: 'Вейн',
               smallItems: [
-                {name: 'Шоколадный батончик', count: 3},
-                {name: 'Кружка', count: 1},
+                { name: 'Шоколадный батончик', count: 3 },
+                { name: 'Кружка', count: 1 },
               ],
             },
           ],
@@ -270,8 +277,8 @@ describe('storage migration', () => {
     await restored.persist.rehydrate();
 
     expect(restored.getState().characters[0].smallItems).toEqual([
-      {name: 'Шоколадный батончик', count: 3},
-      {name: 'Кружка', count: 1},
+      { name: 'Шоколадный батончик', count: 3 },
+      { name: 'Кружка', count: 1 },
     ]);
   });
 
@@ -298,7 +305,7 @@ describe('storage migration', () => {
     await restored.persist.rehydrate();
 
     expect(restored.getState().characters[0].noteGroups).toEqual([
-      {id: 'g0', title: 'Общие', text: 'Цели: отдать долг'},
+      { id: 'g0', title: 'Общие', text: 'Цели: отдать долг' },
     ]);
   });
 
@@ -312,8 +319,8 @@ describe('storage migration', () => {
               id: 'a',
               name: 'Вейн',
               noteGroups: [
-                {id: 'n1', title: 'Цели', text: 'Отдать долг'},
-                {id: 'n2', title: 'Мастеру', text: 'Нужен нож'},
+                { id: 'n1', title: 'Цели', text: 'Отдать долг' },
+                { id: 'n2', title: 'Мастеру', text: 'Нужен нож' },
               ],
             },
           ],
@@ -328,8 +335,8 @@ describe('storage migration', () => {
     await restored.persist.rehydrate();
 
     expect(restored.getState().characters[0].noteGroups).toEqual([
-      {id: 'n1', title: 'Цели', text: 'Отдать долг'},
-      {id: 'n2', title: 'Мастеру', text: 'Нужен нож'},
+      { id: 'n1', title: 'Цели', text: 'Отдать долг' },
+      { id: 'n2', title: 'Мастеру', text: 'Нужен нож' },
     ]);
   });
 
@@ -343,11 +350,17 @@ describe('storage migration', () => {
               id: 'a',
               name: 'Вейн',
               smallItems: [
-                {name: 'Датчик', count: 2, condition: 4},
-                {name: 'Кружка', count: 1},
+                { name: 'Датчик', count: 2, condition: 4 },
+                { name: 'Кружка', count: 1 },
               ],
               weapons: [
-                {name: 'Пистолет', damage: '1d6', uses: 3, maxUses: 8, condition: 2},
+                {
+                  name: 'Пистолет',
+                  damage: '1d6',
+                  uses: 3,
+                  maxUses: 8,
+                  condition: 2,
+                },
               ],
             },
           ],
@@ -363,8 +376,8 @@ describe('storage migration', () => {
 
     const [character] = restored.getState().characters;
     expect(character.smallItems).toEqual([
-      {name: 'Датчик', count: 2, condition: 4},
-      {name: 'Кружка', count: 1},
+      { name: 'Датчик', count: 2, condition: 4 },
+      { name: 'Кружка', count: 1 },
     ]);
     expect(character.weapons[0]).toEqual({
       name: 'Пистолет',
@@ -374,16 +387,16 @@ describe('storage migration', () => {
       condition: 2,
       ammo: '',
     });
-    expect(
-      JSON.parse(storage.getString('characters') as string).version,
-    ).toBe(5);
+    expect(JSON.parse(storage.getString('characters') as string).version).toBe(
+      5,
+    );
   });
 });
 
 describe('dice', () => {
   it('keeps ability values in the -3..+3 range', () => {
     for (let i = 0; i < 500; i += 1) {
-      const {first, second, value} = rollAbilityValue();
+      const { first, second, value } = rollAbilityValue();
       expect(first).toBeGreaterThanOrEqual(1);
       expect(first).toBeLessThanOrEqual(4);
       expect(value).toBe(first - second);
@@ -445,7 +458,7 @@ describe('hub store', () => {
   it('creates a hub from a draft and stamps it', () => {
     useCharacterStore
       .getState()
-      .createHub({...STARTING_HUBS.station, hull: 'Кольцо Рас'});
+      .createHub({ ...STARTING_HUBS.station, hull: 'Кольцо Рас' });
     const hub = useCharacterStore.getState().hub;
 
     expect(hub).not.toBeNull();
@@ -458,8 +471,8 @@ describe('hub store', () => {
 
   it('recreates a hub without leaving the previous one behind', () => {
     const store = useCharacterStore.getState();
-    store.createHub({...STARTING_HUBS.starship, hull: 'Первый'});
-    store.createHub({...STARTING_HUBS.starship, hull: 'Второй'});
+    store.createHub({ ...STARTING_HUBS.starship, hull: 'Первый' });
+    store.createHub({ ...STARTING_HUBS.starship, hull: 'Второй' });
     const hub = useCharacterStore.getState().hub;
 
     expect(hub?.hull).toBe('Второй');
@@ -467,12 +480,12 @@ describe('hub store', () => {
 
   it('patches a hub and keeps characters untouched', () => {
     const store = useCharacterStore.getState();
-    store.addCharacter({...emptyCharacter(), name: 'Вейн'});
-    store.createHub({...STARTING_HUBS.starship});
+    store.addCharacter({ ...emptyCharacter(), name: 'Вейн' });
+    store.createHub({ ...STARTING_HUBS.starship });
 
     store.updateHub({
       fuel: 2,
-      modules: [{id: 'm1', name: 'Бар', energy: 1}],
+      modules: [{ id: 'm1', name: 'Бар', energy: 1 }],
     });
     const state = useCharacterStore.getState();
 
@@ -484,8 +497,8 @@ describe('hub store', () => {
 
   it('removes a hub and leaves characters in place', () => {
     const store = useCharacterStore.getState();
-    store.addCharacter({...emptyCharacter(), name: 'Вейн'});
-    store.createHub({...STARTING_HUBS.starship});
+    store.addCharacter({ ...emptyCharacter(), name: 'Вейн' });
+    store.createHub({ ...STARTING_HUBS.starship });
 
     store.removeHub();
     const state = useCharacterStore.getState();
@@ -496,12 +509,10 @@ describe('hub store', () => {
 
   it('brings a removed hub back through undoRemove', () => {
     const store = useCharacterStore.getState();
-    store.createHub({...STARTING_HUBS.starship, hull: 'Возвращённый хаб'});
+    store.createHub({ ...STARTING_HUBS.starship, hull: 'Возвращённый хаб' });
     store.removeHub();
 
-    expect(useCharacterStore.getState().undoHub?.hull).toBe(
-      'Возвращённый хаб',
-    );
+    expect(useCharacterStore.getState().undoHub?.hull).toBe('Возвращённый хаб');
 
     useCharacterStore.getState().undoRemove();
     const state = useCharacterStore.getState();
@@ -521,7 +532,7 @@ describe('hub store', () => {
   it('rehydrates the hub from MMKV', async () => {
     useCharacterStore
       .getState()
-      .createHub({...STARTING_HUBS.starship, hull: 'Из хранилища'});
+      .createHub({ ...STARTING_HUBS.starship, hull: 'Из хранилища' });
 
     const restored = createCharacterStore();
     await restored.persist.rehydrate();

@@ -776,7 +776,10 @@ export default function CharacterScreen({ navigation, route }: Props) {
                         set({
                           items: character.items.map(current =>
                             current.id === item.id
-                              ? { ...current, weight: Math.max(0, itemWeight(current) - 1) }
+                              ? {
+                                  ...current,
+                                  weight: Math.max(0, itemWeight(current) - 1),
+                                }
                               : current,
                           ),
                         })
@@ -913,9 +916,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                         >
                           <Text style={styles.smallItemCountSign}>−</Text>
                         </Pressable>
-                        <Text style={styles.smallItemCount}>
-                          {item.count}
-                        </Text>
+                        <Text style={styles.smallItemCount}>{item.count}</Text>
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`Больше: ${item.name}`}
@@ -993,7 +994,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   const name = text.trim();
                   if (name) {
                     set({
-                      smallItems: [...character.smallItems, {name, count: 1}],
+                      smallItems: [...character.smallItems, { name, count: 1 }],
                     });
                   }
                 }}
@@ -1020,69 +1021,69 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       })
                     }
                   />
-<View style={styles.row}>
-                      <Field
-                        style={styles.weaponHalf}
-                        label="УРОН"
-                        value={weapon.damage}
-                        onChangeText={damage =>
-                          set({
-                            weapons: replaceWeapon(character.weapons, index, {
-                              ...weapon,
-                              damage,
-                            }),
-                          })
-                        }
-                        placeholder="1d6"
-                      />
-                      <Field
-                        style={styles.weaponHalf}
-                        label="В ОБОЙМЕ СЕЙЧАС"
-                        value={weapon.uses ? String(weapon.uses) : ''}
-                        onChangeText={value =>
-                          set({
-                            weapons: replaceWeapon(character.weapons, index, {
-                              ...weapon,
-                              uses: parseInt(value, 10) || 0,
-                            }),
-                          })
-                        }
-                        keyboardType="number-pad"
-                      />
-                    </View>
-                    <View style={styles.row}>
-                      <Field
-                        style={styles.weaponHalf}
-                        label="В ОБОЙМЕ МАКСИМУМ"
-                        value={
-                          weapon.maxUses != null && weapon.maxUses > 0
-                            ? String(weapon.maxUses)
-                            : ''
-                        }
-                        onChangeText={value =>
-                          set({
-                            weapons: replaceWeapon(character.weapons, index, {
-                              ...weapon,
-                              maxUses: parseInt(value, 10) || 0,
-                            }),
-                          })
-                        }
-                        keyboardType="number-pad"
-                      />
-                      <Field
-                        style={styles.weaponHalf}
-                        label="ВСЕГО ПАТРОН"
-                        value={weapon.ammo ?? ''}
-                        onChangeText={ammo =>
-                          set({
-                            weapons: replaceWeapon(character.weapons, index, {
-                              ...weapon,
-                              ammo,
-                            }),
-                          })
-                        }
-                      />
-                    </View>
+                  <View style={styles.row}>
+                    <Field
+                      style={styles.weaponHalf}
+                      label="УРОН"
+                      value={weapon.damage}
+                      onChangeText={damage =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            damage,
+                          }),
+                        })
+                      }
+                      placeholder="1d6"
+                    />
+                    <Field
+                      style={styles.weaponHalf}
+                      label="В ОБОЙМЕ СЕЙЧАС"
+                      value={weapon.uses ? String(weapon.uses) : ''}
+                      onChangeText={value =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            uses: parseInt(value, 10) || 0,
+                          }),
+                        })
+                      }
+                      keyboardType="number-pad"
+                    />
+                  </View>
+                  <View style={styles.row}>
+                    <Field
+                      style={styles.weaponHalf}
+                      label="В ОБОЙМЕ МАКСИМУМ"
+                      value={
+                        weapon.maxUses != null && weapon.maxUses > 0
+                          ? String(weapon.maxUses)
+                          : ''
+                      }
+                      onChangeText={value =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            maxUses: parseInt(value, 10) || 0,
+                          }),
+                        })
+                      }
+                      keyboardType="number-pad"
+                    />
+                    <Field
+                      style={styles.weaponHalf}
+                      label="ВСЕГО ПАТРОН"
+                      value={weapon.ammo ?? ''}
+                      onChangeText={ammo =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            ammo,
+                          }),
+                        })
+                      }
+                    />
+                  </View>
                   <Text style={styles.subLabel}>СОСТОЯНИЕ</Text>
                   <Track
                     value={weapon.condition}
@@ -1224,7 +1225,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   onChangeText={title =>
                     set({
                       noteGroups: character.noteGroups.map((entry, i) =>
-                        i === index ? {...entry, title} : entry,
+                        i === index ? { ...entry, title } : entry,
                       ),
                     })
                   }
@@ -1236,7 +1237,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   onChangeText={text =>
                     set({
                       noteGroups: character.noteGroups.map((entry, i) =>
-                        i === index ? {...entry, text} : entry,
+                        i === index ? { ...entry, text } : entry,
                       ),
                     })
                   }
@@ -1250,9 +1251,11 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   onPress={() =>
                     Alert.alert(
                       'Удалить группу?',
-                      `Группа «${group.title || 'Без названия'}» будет удалена.`,
+                      `Группа «${
+                        group.title || 'Без названия'
+                      }» будет удалена.`,
                       [
-                        {text: 'Отмена', style: 'cancel'},
+                        { text: 'Отмена', style: 'cancel' },
                         {
                           text: 'Удалить',
                           style: 'destructive',
@@ -1278,7 +1281,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                     set({
                       noteGroups: [
                         ...character.noteGroups,
-                        {id: newId(), title: trimmed, text: ''},
+                        { id: newId(), title: trimmed, text: '' },
                       ],
                     });
                   }
@@ -1430,7 +1433,8 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       set({
                         voidCorruption: active
                           ? character.voidCorruption.filter(
-                              item => item !== `${corruption.id}. ${corruption.text}`,
+                              item =>
+                                item !== `${corruption.id}. ${corruption.text}`,
                             )
                           : [
                               ...character.voidCorruption,

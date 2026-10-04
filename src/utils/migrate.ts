@@ -75,7 +75,11 @@ export function normalizeSmallItems(raw: unknown): SmallItem[] {
         if (!entry) {
           return null;
         }
-        return collect(text(entry.name), count(entry.count, 1), entry.condition);
+        return collect(
+          text(entry.name),
+          count(entry.count, 1),
+          entry.condition,
+        );
       })
       .filter((item): item is SmallItem => item !== null);
   }

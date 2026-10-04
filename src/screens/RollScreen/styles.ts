@@ -51,6 +51,11 @@ export const styles = StyleSheet.create({
   },
   dieValue: { color: colors.text, fontSize: 20, fontWeight: '800' },
   dieLabel: { color: colors.textFaint, fontSize: font.tiny, letterSpacing: 1 },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   historyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

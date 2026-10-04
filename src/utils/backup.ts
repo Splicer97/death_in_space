@@ -68,8 +68,8 @@ function smallItemList(value: unknown): Character['smallItems'] {
     }
     const condition = count(state);
     return condition > 0
-      ? {name: trimmed, count: total, condition}
-      : {name: trimmed, count: total};
+      ? { name: trimmed, count: total, condition }
+      : { name: trimmed, count: total };
   };
   if (Array.isArray(value)) {
     return value
@@ -77,15 +77,21 @@ function smallItemList(value: unknown): Character['smallItems'] {
         if (typeof entry === 'string') {
           return collect(entry, 1);
         }
-        return isRaw(entry) ? collect(entry.name, entry.count, entry.condition) : null;
+        return isRaw(entry)
+          ? collect(entry.name, entry.count, entry.condition)
+          : null;
       })
-      .filter((entry): entry is Character['smallItems'][number] => entry !== null);
+      .filter(
+        (entry): entry is Character['smallItems'][number] => entry !== null,
+      );
   }
   if (typeof value === 'string' && value.trim()) {
     return value
       .split(/\r?\n+/)
       .map(entry => collect(entry, 1))
-      .filter((entry): entry is Character['smallItems'][number] => entry !== null);
+      .filter(
+        (entry): entry is Character['smallItems'][number] => entry !== null,
+      );
   }
   return [];
 }
@@ -123,7 +129,7 @@ function sanitizeArmor(raw: unknown): Armor | null {
     type: text(raw.type),
     protectsAgainst: text(raw.protectsAgainst),
     drBonus: count(raw.drBonus),
-    ...(typeof slots === 'number' && Number.isFinite(slots) ? {slots} : {}),
+    ...(typeof slots === 'number' && Number.isFinite(slots) ? { slots } : {}),
   };
 }
 
@@ -148,14 +154,18 @@ function sanitizeCharacter(raw: Raw): Character {
     looks: text(raw.looks),
     portrait: text(raw.portrait, base.portrait),
     abilities: {
-      body: count(raw.abilities && isRaw(raw.abilities) ? raw.abilities.body : 0),
+      body: count(
+        raw.abilities && isRaw(raw.abilities) ? raw.abilities.body : 0,
+      ),
       dexterity: count(
         raw.abilities && isRaw(raw.abilities) ? raw.abilities.dexterity : 0,
       ),
       savvy: count(
         raw.abilities && isRaw(raw.abilities) ? raw.abilities.savvy : 0,
       ),
-      tech: count(raw.abilities && isRaw(raw.abilities) ? raw.abilities.tech : 0),
+      tech: count(
+        raw.abilities && isRaw(raw.abilities) ? raw.abilities.tech : 0,
+      ),
     },
     hp: count(raw.hp),
     hpMax: count(raw.hpMax),
@@ -193,7 +203,9 @@ function noteGroupList(value: unknown): Character['noteGroups'] {
           text: text(group.text),
         };
       })
-      .filter((group): group is Character['noteGroups'][number] => group !== null);
+      .filter(
+        (group): group is Character['noteGroups'][number] => group !== null,
+      );
   }
   if (typeof value === 'string' && value.trim()) {
     return [{ id: 'g0', title: 'Общие', text: value }];
@@ -245,7 +257,7 @@ function withUniqueIds(characters: Character[]): Character[] {
       seen.add(character.id);
       return character;
     }
-    const replacement = {...character, id: newId()};
+    const replacement = { ...character, id: newId() };
     seen.add(replacement.id);
     return replacement;
   });
@@ -291,29 +303,30 @@ export function backupToText(state: {
 export function parseBackup(raw: string): ParseResult {
   const trimmed = raw.trim();
   if (!trimmed) {
-    return {ok: false, error: 'Вставьте JSON из резервной копии'};
+    return { ok: false, error: 'Вставьте JSON из резервной копии' };
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(trimmed);
   } catch {
-    return {ok: false, error: 'Это не JSON. Скопируйте текст копии целиком'};
+    return { ok: false, error: 'Это не JSON. Скопируйте текст копии целиком' };
   }
 
   if (!isRaw(parsed) && !Array.isArray(parsed)) {
-    return {ok: false, error: 'Ожидался объект с персонажами и хабом'};
+    return { ok: false, error: 'Ожидался объект с персонажами и хабом' };
   }
 
   if (Array.isArray(parsed)) {
-    return finish({characters: parsed, activeId: null, hub: null});
+    return finish({ characters: parsed, activeId: null, hub: null });
   }
 
   if (parsed.app !== undefined && parsed.app !== BACKUP_APP) {
-    return {ok: false, error: 'Это не резервная копия «Смерть в космосе»'};
+    return { ok: false, error: 'Это не резервная копия «Смерть в космосе»' };
   }
 
-  const version = parsed.version === undefined ? BACKUP_VERSION : count(parsed.version);
+  const version =
+    parsed.version === undefined ? BACKUP_VERSION : count(parsed.version);
   if (version > BACKUP_VERSION) {
     return {
       ok: false,
@@ -322,7 +335,7 @@ export function parseBackup(raw: string): ParseResult {
   }
 
   if (parsed.characters === undefined && parsed.hub === undefined) {
-    return {ok: false, error: 'В копии нет ни персонажей, ни хаба'};
+    return { ok: false, error: 'В копии нет ни персонажей, ни хаба' };
   }
 
   return finish({
@@ -353,5 +366,5 @@ function finish(input: {
     activeId,
     hub,
   };
-  return {ok: true, backup, summary: summarize(backup)};
+  return { ok: true, backup, summary: summarize(backup) };
 }

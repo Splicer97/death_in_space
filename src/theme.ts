@@ -1,4 +1,4 @@
-import type {AbilityKey} from './types';
+import type { AbilityKey } from './types';
 
 export const colors = {
   bg: '#0B0B0D',
@@ -106,14 +106,14 @@ export const shadow = {
     shadowColor: '#000',
     shadowOpacity: 0.45,
     shadowRadius: 14,
-    shadowOffset: {width: 0, height: 6},
+    shadowOffset: { width: 0, height: 6 },
     elevation: 6,
   },
   raised: {
     shadowColor: '#000',
     shadowOpacity: 0.6,
     shadowRadius: 8,
-    shadowOffset: {width: 0, height: 3},
+    shadowOffset: { width: 0, height: 3 },
     elevation: 4,
   },
 } as const;

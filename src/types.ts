@@ -203,7 +203,8 @@ export const STARTING_HUBS: Record<HubType, HubDraft> = {
 export const HUB_CORE_FUNCTIONS: { name: string; description: string }[] = [
   {
     name: 'Командный центр',
-    description: 'Мостик хаба: сканирование, связь и управление (только звездолёты).',
+    description:
+      'Мостик хаба: сканирование, связь и управление (только звездолёты).',
   },
   {
     name: 'Каюты экипажа',
@@ -224,7 +225,10 @@ export function energyUsed(modules: InstalledModule[]): number {
   return modules.reduce((sum, item) => sum + item.energy, 0);
 }
 
-export function energyOverdrawn(modules: InstalledModule[], output: number): boolean {
+export function energyOverdrawn(
+  modules: InstalledModule[],
+  output: number,
+): boolean {
   return energyUsed(modules) > output;
 }
 

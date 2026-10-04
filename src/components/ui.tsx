@@ -54,7 +54,7 @@ export function Ornament({
   return (
     <View style={styles.ornament}>
       <View style={styles.ornamentRule} />
-      <Text style={[styles.ornamentText, {color}, style]}>
+      <Text style={[styles.ornamentText, { color }, style]}>
         {glyphs.join(' ')}
       </Text>
       <View style={styles.ornamentRule} />
@@ -634,15 +634,19 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     marginBottom: spacing.md,
   },
-  searchIcon: {color: colors.textFaint, fontSize: 16, marginRight: spacing.xs},
+  searchIcon: {
+    color: colors.textFaint,
+    fontSize: 16,
+    marginRight: spacing.xs,
+  },
   searchInput: {
     flex: 1,
     color: colors.text,
     fontSize: font.small,
     paddingVertical: spacing.sm,
   },
-  searchClear: {paddingHorizontal: spacing.xs},
-  searchClearText: {color: colors.textFaint, fontSize: font.small},
+  searchClear: { paddingHorizontal: spacing.xs },
+  searchClearText: { color: colors.textFaint, fontSize: font.small },
   snackbar: {
     position: 'absolute',
     left: spacing.lg,
@@ -660,7 +664,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     ...shadow.card,
   },
-  snackbarText: {flex: 1, color: colors.text, fontSize: font.small},
+  snackbarText: { flex: 1, color: colors.text, fontSize: font.small },
   snackbarAction: {
     color: colors.yellow,
     fontSize: font.small,
@@ -668,7 +672,7 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.8,
     paddingHorizontal: spacing.sm,
   },
-  snackbarClose: {color: colors.textFaint, fontSize: font.small},
+  snackbarClose: { color: colors.textFaint, fontSize: font.small },
   emptyGlyph: {
     width: 96,
     height: 96,

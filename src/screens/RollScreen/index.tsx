@@ -4,6 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { Button, Card, Chip, Screen, SectionTitle } from '../../components/ui';
 import { selectCharacter, useCharacterStore } from '../../store/characterStore';
+import { selectHistory, useRollStore } from '../../store/rollStore';
 import { ABILITY_LABELS, colors } from '../../theme';
 import { defenseRating, type AbilityKey } from '../../types';
 import {
@@ -47,7 +48,9 @@ export default function RollScreen({ route }: Props) {
   const [ability, setAbility] = useState<AbilityKey | null>('body');
   const [mode, setMode] = useState<ModifierMode>('normal');
   const [target, setTarget] = useState<number | null>(12);
-  const [history, setHistory] = useState<RollResult[]>([]);
+  const history = useRollStore(selectHistory(route.params.id));
+  const push = useRollStore(state => state.push);
+  const clear = useRollStore(state => state.clear);
   const [last, setLast] = useState<RollResult | null>(null);
   const [extra, setExtra] = useState(() => rollAll());
 
@@ -60,8 +63,8 @@ export default function RollScreen({ route }: Props) {
     const result = performRoll(modifier, mode, target);
     setLast(result);
     setExtra(rollAll());
-    setHistory(current => [result, ...current].slice(0, 12));
-  }, [mode, modifier, target]);
+    push(route.params.id, result);
+  }, [mode, modifier, push, route.params.id, target]);
 
   return (
     <Screen>
@@ -171,7 +174,15 @@ export default function RollScreen({ route }: Props) {
 
         {history.length > 0 ? (
           <Card>
-            <SectionTitle title="ИСТОРИЯ" />
+            <View style={styles.historyHeader}>
+              <SectionTitle title="ИСТОРИЯ" />
+              <Button
+                title="ОЧИСТИТЬ"
+                variant="ghost"
+                singleLine
+                onPress={() => clear(route.params.id)}
+              />
+            </View>
             {history.map((result, index) => (
               <View key={index} style={styles.historyRow}>
                 <Text style={styles.historyText}>{formatRoll(result)}</Text>

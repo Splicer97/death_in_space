@@ -65,7 +65,7 @@ describe('derived character values', () => {
   });
 
   it('sums abilities', () => {
-    expect(abilitySum({body: 1, dexterity: 0, savvy: -1, tech: 1})).toBe(1);
+    expect(abilitySum({ body: 1, dexterity: 0, savvy: -1, tech: 1 })).toBe(1);
   });
 });
 

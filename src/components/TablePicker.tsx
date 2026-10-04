@@ -40,11 +40,17 @@ export function TablePicker({
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.die}>{die}</Text>
           </View>
-          <Pressable accessibilityRole="button" accessibilityLabel="Закрыть" onPress={onClose}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Закрыть"
+            onPress={onClose}
+          >
             <Text style={styles.close}>✕</Text>
           </Pressable>
         </View>
-        <Text style={styles.hint}>Выберите строку или впишите своё в поле выше</Text>
+        <Text style={styles.hint}>
+          Выберите строку или впишите своё в поле выше
+        </Text>
         <ScrollView style={styles.list}>
           {entries.map(entry => (
             <Pressable
@@ -56,7 +62,12 @@ export function TablePicker({
                 onClose();
               }}
             >
-              <View style={[styles.option, value === entry.text && styles.optionActive]}>
+              <View
+                style={[
+                  styles.option,
+                  value === entry.text && styles.optionActive,
+                ]}
+              >
                 <Text style={styles.optionRoll}>{entry.roll}</Text>
                 <View style={styles.optionBody}>
                   <Text style={styles.optionText}>{entry.text}</Text>
@@ -74,7 +85,7 @@ export function TablePicker({
 }
 
 const styles = StyleSheet.create({
-  backdrop: {flex: 1, backgroundColor: 'rgba(0,0,0,0.7)'},
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' },
   sheet: {
     maxHeight: '80%',
     backgroundColor: colors.bg,
@@ -90,22 +101,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
   },
-  titles: {flexDirection: 'row', alignItems: 'center'},
-  title: {color: colors.text, fontSize: font.heading, fontWeight: '800'},
+  titles: { flexDirection: 'row', alignItems: 'center' },
+  title: { color: colors.text, fontSize: font.heading, fontWeight: '800' },
   die: {
     color: colors.yellow,
     fontSize: font.small,
     fontWeight: '700',
     marginLeft: spacing.sm,
   },
-  close: {color: colors.textDim, fontSize: 20, padding: spacing.xs},
+  close: { color: colors.textDim, fontSize: 20, padding: spacing.xs },
   hint: {
     color: colors.textFaint,
     fontSize: font.small,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.sm,
   },
-  list: {paddingHorizontal: spacing.lg, paddingBottom: spacing.lg},
+  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
   option: {
     flexDirection: 'row',
     borderWidth: 1,
@@ -114,10 +125,18 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     marginBottom: spacing.sm,
   },
-  optionActive: {borderColor: colors.yellow, backgroundColor: colors.surfaceAlt},
-  optionRoll: {color: colors.yellow, fontSize: font.small, fontWeight: '800', width: 26},
-  optionBody: {flex: 1},
-  optionText: {color: colors.text, fontSize: font.small, lineHeight: 18},
+  optionActive: {
+    borderColor: colors.yellow,
+    backgroundColor: colors.surfaceAlt,
+  },
+  optionRoll: {
+    color: colors.yellow,
+    fontSize: font.small,
+    fontWeight: '800',
+    width: 26,
+  },
+  optionBody: { flex: 1 },
+  optionText: { color: colors.text, fontSize: font.small, lineHeight: 18 },
   optionDesc: {
     color: colors.textFaint,
     fontSize: font.small,

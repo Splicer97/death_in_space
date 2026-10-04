@@ -1,0 +1,6 @@
+node_modules
+android
+ios
+.bundle
+package-lock.json
+Gemfile

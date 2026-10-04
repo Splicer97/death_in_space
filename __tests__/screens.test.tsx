@@ -183,7 +183,9 @@ describe('character creation flow', () => {
     expect(state.characters).toHaveLength(1);
     expect(state.characters[0].name).toBe('Вейн');
     expect(state.characters[0].origin).toBe('carbon');
-    expect(state.characters[0].originBenefits).toEqual(['ИСКУССТВЕННЫЕ ЛЕГКИЕ']);
+    expect(state.characters[0].originBenefits).toEqual([
+      'ИСКУССТВЕННЫЕ ЛЕГКИЕ',
+    ]);
     expect(state.characters[0].holos).toBeGreaterThanOrEqual(3);
     expect(calls.replace).toHaveBeenCalledWith('Character', {
       id: state.characters[0].id,
@@ -471,7 +473,7 @@ describe('character sheet', () => {
     const id = useCharacterStore.getState().activeId as string;
     act(() => {
       useCharacterStore.getState().updateCharacter(id, {
-        smallItems: [{name: 'Шоколадный батончик', count: 3}],
+        smallItems: [{ name: 'Шоколадный батончик', count: 3 }],
       });
     });
 
@@ -497,7 +499,7 @@ describe('character sheet', () => {
     });
 
     expect(useCharacterStore.getState().characters[0].smallItems).toEqual([
-      {name: 'Шоколадный батончик', count: 4},
+      { name: 'Шоколадный батончик', count: 4 },
     ]);
   });
 
@@ -505,7 +507,7 @@ describe('character sheet', () => {
     const id = useCharacterStore.getState().activeId as string;
     act(() => {
       useCharacterStore.getState().updateCharacter(id, {
-        smallItems: [{name: 'Болт', count: 1}],
+        smallItems: [{ name: 'Болт', count: 1 }],
       });
     });
 
@@ -522,10 +524,9 @@ describe('character sheet', () => {
 
     press(tree.root, 'ВЕЩИ');
 
-    const nameInput = tree.root.findAll(
-      node => node.props?.value === 'Болт',
-      { deep: true },
-    )[0];
+    const nameInput = tree.root.findAll(node => node.props?.value === 'Болт', {
+      deep: true,
+    })[0];
     expect(nameInput).toBeDefined();
     act(() => {
       nameInput.props.onChangeText('Гайка');
@@ -539,9 +540,9 @@ describe('character sheet', () => {
     act(() => {
       toggle.props.onPress();
     });
-    expect(
-      useCharacterStore.getState().characters[0].smallItems,
-    ).toEqual([{name: 'Гайка', count: 1, condition: 5}]);
+    expect(useCharacterStore.getState().characters[0].smallItems).toEqual([
+      { name: 'Гайка', count: 1, condition: 5 },
+    ]);
 
     const levelThree = tree.root.findAll(
       node => node.props?.accessibilityLabel === 'Состояние 3',
@@ -550,16 +551,16 @@ describe('character sheet', () => {
     act(() => {
       levelThree.props.onPress();
     });
-    expect(
-      useCharacterStore.getState().characters[0].smallItems,
-    ).toEqual([{name: 'Гайка', count: 1, condition: 3}]);
+    expect(useCharacterStore.getState().characters[0].smallItems).toEqual([
+      { name: 'Гайка', count: 1, condition: 3 },
+    ]);
   });
 
   it('turns an item condition off and back on', () => {
     const id = useCharacterStore.getState().activeId as string;
     act(() => {
       useCharacterStore.getState().updateCharacter(id, {
-        items: [{id: 'i1', name: 'Скафандр', condition: 0, weight: 0}],
+        items: [{ id: 'i1', name: 'Скафандр', condition: 0, weight: 0 }],
       });
     });
 
@@ -584,9 +585,9 @@ describe('character sheet', () => {
     act(() => {
       toggle.props.onPress();
     });
-    expect(
-      useCharacterStore.getState().characters[0].items[0].condition,
-    ).toBe(5);
+    expect(useCharacterStore.getState().characters[0].items[0].condition).toBe(
+      5,
+    );
 
     toggle = tree.root.findAll(
       node => node.props?.accessibilityLabel === 'Убрать состояние',
@@ -596,9 +597,9 @@ describe('character sheet', () => {
     act(() => {
       toggle.props.onPress();
     });
-    expect(
-      useCharacterStore.getState().characters[0].items[0].condition,
-    ).toBe(0);
+    expect(useCharacterStore.getState().characters[0].items[0].condition).toBe(
+      0,
+    );
   });
 
   it('opens the dice roller', () => {
@@ -645,7 +646,8 @@ describe('character sheet', () => {
     press(tree.root, 'УДАЛИТЬ ПЕРСОНАЖА');
     const buttons = confirmSpy.mock.calls[0][2] ?? [];
     const destructive = buttons.find(
-      button => typeof button.style === 'string' && button.style === 'destructive',
+      button =>
+        typeof button.style === 'string' && button.style === 'destructive',
     );
     act(() => {
       destructive?.onPress?.();
@@ -677,9 +679,9 @@ describe('character sheet', () => {
     const state = useCharacterStore.getState();
     expect(stillInRoster()).toBe(true);
     expect(state.undoCharacter).toBeNull();
-    expect(
-      state.characters.find(item => item.id === id)?.name,
-    ).toBe('Отменённый');
+    expect(state.characters.find(item => item.id === id)?.name).toBe(
+      'Отменённый',
+    );
     confirmSpy.mockRestore();
   });
 
@@ -687,7 +689,7 @@ describe('character sheet', () => {
     const id = useCharacterStore.getState().activeId as string;
     act(() => {
       useCharacterStore.getState().updateCharacter(id, {
-        noteGroups: [{id: 'n1', title: 'Цели', text: 'Отдать долг'}],
+        noteGroups: [{ id: 'n1', title: 'Цели', text: 'Отдать долг' }],
       });
     });
 
@@ -709,7 +711,8 @@ describe('character sheet', () => {
 
     const titleField = tree.root.findAll(
       node =>
-        typeof node.type === 'string' && node.props.placeholder === 'Цели, связи, долги…',
+        typeof node.type === 'string' &&
+        node.props.placeholder === 'Цели, связи, долги…',
     )[0];
     act(() => {
       titleField.props.onChangeText('Долги');
@@ -785,14 +788,16 @@ describe('backup screen', () => {
   }
 
   it('shares a copy of the roster and the hub', () => {
-    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Вейн'});
+    useCharacterStore
+      .getState()
+      .addCharacter({ ...emptyCharacter(), name: 'Вейн' });
     useCharacterStore.getState().createHub({
       ...STARTING_HUBS.starship,
       hull: 'Кольцо Рас',
     });
     const shareSpy = jest
       .spyOn(Share, 'share')
-      .mockResolvedValue({action: 'sharedAction', activityType: undefined});
+      .mockResolvedValue({ action: 'sharedAction', activityType: undefined });
 
     const tree = renderData();
     press(tree.root, 'ПОДЕЛИТЬСЯ КОПИЕЙ');
@@ -805,7 +810,9 @@ describe('backup screen', () => {
   });
 
   it('complains about a broken paste and keeps the current data', () => {
-    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Вейн'});
+    useCharacterStore
+      .getState()
+      .addCharacter({ ...emptyCharacter(), name: 'Вейн' });
     const tree = renderData();
 
     paste(tree, 'привет');
@@ -815,17 +822,21 @@ describe('backup screen', () => {
   });
 
   it('previews the copy and replaces the data only after a confirmation', () => {
-    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Лишний'});
+    useCharacterStore
+      .getState()
+      .addCharacter({ ...emptyCharacter(), name: 'Лишний' });
     const backup = JSON.stringify({
       app: 'death-in-space',
       version: 1,
-      characters: [{id: 'x', name: 'Вейн'}],
-      hub: {type: 'station', hull: 'Тихая гавань'},
+      characters: [{ id: 'x', name: 'Вейн' }],
+      hub: { type: 'station', hull: 'Тихая гавань' },
     });
 
     const tree = renderData();
     paste(tree, backup);
-    expect(collectText(tree.root)).toContain('В копии: 1 персонаж, хаб «Тихая гавань»');
+    expect(collectText(tree.root)).toContain(
+      'В копии: 1 персонаж, хаб «Тихая гавань»',
+    );
 
     const alertSpy = jest.spyOn(Alert, 'alert');
     press(tree.root, 'ИМПОРТИРОВАТЬ');

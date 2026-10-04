@@ -12,7 +12,7 @@ function sampleCharacter(): Character {
     nickname: 'Искра',
     playerName: 'Аня',
     origin: 'carbon',
-    abilities: {body: 1, dexterity: 0, savvy: -1, tech: 2},
+    abilities: { body: 1, dexterity: 0, savvy: -1, tech: 2 },
     hp: 4,
     hpMax: 6,
     holos: 350,
@@ -20,14 +20,14 @@ function sampleCharacter(): Character {
     background: 'Лунный преступник',
     trait: 'Неудержимый',
     drive: 'Месть',
-    noteGroups: [{id: 'g1', title: 'Цели', text: 'Ищет брата'}],
+    noteGroups: [{ id: 'g1', title: 'Цели', text: 'Ищет брата' }],
     items: [
-      {id: 'i1', name: 'Дробовик', condition: 3},
-      {id: 'i2', name: 'Плазменный нож', condition: 2},
+      { id: 'i1', name: 'Дробовик', condition: 3 },
+      { id: 'i2', name: 'Плазменный нож', condition: 2 },
     ],
     smallItems: [
-      {name: 'Кружка', count: 1},
-      {name: 'Шоколадный батончик', count: 3},
+      { name: 'Кружка', count: 1 },
+      { name: 'Шоколадный батончик', count: 3 },
     ],
     weapons: [
       {
@@ -38,7 +38,7 @@ function sampleCharacter(): Character {
         condition: 2,
         ammo: '1d4×10 · 40/40',
       },
-      {name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: ''},
+      { name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: '' },
     ],
   };
 }
@@ -87,7 +87,7 @@ describe('character sheet export', () => {
   it('omits condition for items without tracking', () => {
     const text = characterToText({
       ...sampleCharacter(),
-      items: [{id: 'i1', name: 'Скафандр', condition: 0}],
+      items: [{ id: 'i1', name: 'Скафандр', condition: 0 }],
     });
 
     expect(text).toContain('• Скафандр');
@@ -135,8 +135,8 @@ describe('hub sheet export', () => {
         energySource: 'Реактор диамагнитного синтеза',
         energyOutput: 6,
         modules: [
-          {id: 'm1', name: 'Бар', energy: 1},
-          {id: 'm2', name: 'Сейф', energy: 2},
+          { id: 'm1', name: 'Бар', energy: 1 },
+          { id: 'm2', name: 'Сейф', energy: 2 },
         ],
       }),
     );
@@ -148,7 +148,7 @@ describe('hub sheet export', () => {
   });
 
   it('marks a station and starts with no modules', () => {
-    const text = hubToText(sampleHub({...STARTING_HUBS.station}));
+    const text = hubToText(sampleHub({ ...STARTING_HUBS.station }));
 
     expect(text).toContain('Станция');
     expect(text).toContain('Тип: станция');

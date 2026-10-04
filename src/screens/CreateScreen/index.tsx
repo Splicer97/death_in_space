@@ -1,11 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, Pressable, Text, TextInput, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
@@ -33,11 +27,7 @@ import {
   TRINKETS,
   type TableEntry,
 } from '../../data/tables';
-import {
-  ABILITY_LABELS,
-  ABILITY_NAMES,
-  colors,
-} from '../../theme';
+import { ABILITY_LABELS, ABILITY_NAMES, colors } from '../../theme';
 import {
   abilitySum,
   itemSlots,
@@ -182,11 +172,11 @@ export default function CreateScreen({ navigation }: Props) {
         {step === 0 ? (
           <>
             <Card>
-<SectionTitle
-                  index="ШАГ 1"
-                  title="ГЕНЕРАЦИЯ СПОСОБНОСТЕЙ"
-                  subtitle="2d4, первая минус вторая · диапазон −3…+3"
-                />
+              <SectionTitle
+                index="ШАГ 1"
+                title="ГЕНЕРАЦИЯ СПОСОБНОСТЕЙ"
+                subtitle="2d4, первая минус вторая · диапазон −3…+3"
+              />
               {ABILITY_KEYS.map(key => (
                 <NumberStepper
                   key={key}

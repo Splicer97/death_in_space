@@ -1,19 +1,14 @@
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+
+import { mmkvStorage } from './storage';
 import {
-  createJSONStorage,
-  persist,
-  type StateStorage,
-} from 'zustand/middleware';
-
-import { storage } from './storage';
-import { normalizeItems, normalizeNoteGroups, normalizeSmallItems, normalizeWeapons } from '../utils/migrate';
+  normalizeItems,
+  normalizeNoteGroups,
+  normalizeSmallItems,
+  normalizeWeapons,
+} from '../utils/migrate';
 import type { Character, CharacterDraft, Hub, HubDraft } from '../types';
-
-const mmkvAdapter: StateStorage = {
-  getItem: name => storage.getString(name) ?? null,
-  setItem: (name, value) => storage.set(name, value),
-  removeItem: name => storage.remove(name),
-};
 
 let counter = 0;
 
@@ -183,7 +178,11 @@ export function createCharacterStore() {
         },
 
         removeHub: () =>
-          set(state => ({ hub: null, undoHub: state.hub, undoCharacter: null })),
+          set(state => ({
+            hub: null,
+            undoHub: state.hub,
+            undoCharacter: null,
+          })),
 
         importBackup: payload =>
           set({
@@ -197,7 +196,7 @@ export function createCharacterStore() {
       {
         name: 'characters',
         version: 5,
-        storage: createJSONStorage(() => mmkvAdapter),
+        storage: createJSONStorage(() => mmkvStorage),
         partialize: state => ({
           characters: state.characters,
           activeId: state.activeId,

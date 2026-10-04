@@ -22,21 +22,21 @@ function richCharacter(): Character {
     xp: 3,
     background: 'Беглый',
     trait: 'Хладнокровие',
-    noteGroups: [{id: 'g0', title: 'Общие', text: 'Строка\nс переносом'}],
+    noteGroups: [{ id: 'g0', title: 'Общие', text: 'Строка\nс переносом' }],
     portrait: '🛸',
-    abilities: {body: 2, dexterity: 1, savvy: 0, tech: -1},
+    abilities: { body: 2, dexterity: 1, savvy: 0, tech: -1 },
     hp: 3,
     hpMax: 6,
     voidPoints: 2,
     mutations: ['Дополнительный палец'],
     voidCorruption: ['Эхо'],
     items: [
-      {id: 'item-1', name: 'Детектор', condition: 4, weight: 1},
-      {id: 'item-2', name: 'Кредит', condition: 0, weight: 2},
+      { id: 'item-1', name: 'Детектор', condition: 4, weight: 1 },
+      { id: 'item-2', name: 'Кредит', condition: 0, weight: 2 },
     ],
     smallItems: [
-      {name: 'Компонент', count: 1},
-      {name: 'Шоколадный батончик', count: 3},
+      { name: 'Компонент', count: 1 },
+      { name: 'Шоколадный батончик', count: 3 },
     ],
     weapons: [
       {
@@ -47,7 +47,14 @@ function richCharacter(): Character {
         condition: 3,
         ammo: '1d4×10 · 40/40',
       },
-      {name: 'Мачете', damage: '1d8', uses: 3, maxUses: 3, condition: 1, ammo: ''},
+      {
+        name: 'Мачете',
+        damage: '1d8',
+        uses: 3,
+        maxUses: 3,
+        condition: 1,
+        ammo: '',
+      },
     ],
     armor: {
       type: 'Скафандр',
@@ -70,8 +77,8 @@ function richHub(): Hub {
     condition: 3,
     fuel: 4,
     modules: [
-      {id: 'mod-1', name: 'Бриг', energy: 2},
-      {id: 'mod-2', name: 'Гидропонная ферма', energy: 2},
+      { id: 'mod-1', name: 'Бриг', energy: 2 },
+      { id: 'mod-2', name: 'Гидропонная ферма', energy: 2 },
     ],
     backstory: 'Довоенный грузовик',
     quirk: 'Вечная течь',
@@ -96,11 +103,11 @@ describe('backup export', () => {
     expect(result.backup.characters[0]).toEqual(richCharacter());
     expect(result.backup.hub).toEqual(richHub());
     expect(result.backup.activeId).toBe('char-1');
-    expect(result.summary).toEqual({characters: 1, hub: 'Кольцо Рас'});
+    expect(result.summary).toEqual({ characters: 1, hub: 'Кольцо Рас' });
   });
 
   it('stamps the envelope so a stray paste is recognisable', () => {
-    const backup = buildBackup({characters: [], activeId: null, hub: null});
+    const backup = buildBackup({ characters: [], activeId: null, hub: null });
 
     expect(backup.app).toBe('death-in-space');
     expect(backup.version).toBe(3);
@@ -109,9 +116,9 @@ describe('backup export', () => {
 
   it('reports a hub without a name by its type', () => {
     expect(hubName(null)).toBeNull();
-    expect(hubName({...richHub(), hull: ''})).toBe('Звездолёт');
+    expect(hubName({ ...richHub(), hull: '' })).toBe('Звездолёт');
     expect(
-      hubName({...richHub(), hull: '', type: 'station', defenseRating: 13}),
+      hubName({ ...richHub(), hull: '', type: 'station', defenseRating: 13 }),
     ).toBe('Станция');
   });
 });
@@ -142,7 +149,7 @@ describe('backup import', () => {
 
   it('refuses a copy from a newer app version', () => {
     const result = parseBackup(
-      JSON.stringify({app: 'death-in-space', version: 99, characters: []}),
+      JSON.stringify({ app: 'death-in-space', version: 99, characters: [] }),
     );
 
     expect(result).toEqual({
@@ -152,7 +159,7 @@ describe('backup import', () => {
   });
 
   it('accepts a bare character array as a minimal copy', () => {
-    const result = parseBackup(JSON.stringify([{id: 'a', name: 'Вейн'}]));
+    const result = parseBackup(JSON.stringify([{ id: 'a', name: 'Вейн' }]));
 
     expect(result.ok).toBe(true);
     if (!result.ok) {
@@ -165,7 +172,10 @@ describe('backup import', () => {
 
   it('fills in missing fields so a hand-edited copy cannot break the sheet', () => {
     const result = parseBackup(
-      JSON.stringify({app: 'death-in-space', characters: [{name: 'Ковбой'}]}),
+      JSON.stringify({
+        app: 'death-in-space',
+        characters: [{ name: 'Ковбой' }],
+      }),
     );
 
     expect(result.ok).toBe(true);
@@ -197,13 +207,17 @@ describe('backup import', () => {
             name: 'Вейн',
             hp: 'много',
             mutations: ['Эхо', 7, null],
-            items: [{id: 'i', name: 'Детектор', condition: 'x'}, 'мусор'],
+            items: [{ id: 'i', name: 'Детектор', condition: 'x' }, 'мусор'],
             smallItems: 'Кружка\nКлюч',
-            weapons: [{name: 'Пистолет'}],
+            weapons: [{ name: 'Пистолет' }],
             armor: 'броня',
           },
         ],
-        hub: {type: 'chartreuse', energyOutput: 'много', modules: [{}, {name: 'Бриг', energy: 2}]},
+        hub: {
+          type: 'chartreuse',
+          energyOutput: 'много',
+          modules: [{}, { name: 'Бриг', energy: 2 }],
+        },
       }),
     );
 
@@ -215,11 +229,11 @@ describe('backup import', () => {
     expect(character.hp).toBe(0);
     expect(character.mutations).toEqual(['Эхо']);
     expect(character.items).toEqual([
-      {id: 'i', name: 'Детектор', condition: 0, weight: 1},
+      { id: 'i', name: 'Детектор', condition: 0, weight: 1 },
     ]);
     expect(character.smallItems).toEqual([
-      {name: 'Кружка', count: 1},
-      {name: 'Ключ', count: 1},
+      { name: 'Кружка', count: 1 },
+      { name: 'Ключ', count: 1 },
     ]);
     expect(character.weapons[0].name).toBe('Пистолет');
     expect(character.weapons[0].ammo).toBe('');
@@ -238,8 +252,8 @@ describe('backup import', () => {
         app: 'death-in-space',
         activeId: 'улетел',
         characters: [
-          {id: 'same', name: 'Первый'},
-          {id: 'same', name: 'Второй'},
+          { id: 'same', name: 'Первый' },
+          { id: 'same', name: 'Второй' },
         ],
       }),
     );
@@ -255,14 +269,14 @@ describe('backup import', () => {
 
   it('describes an empty copy without pretending it holds data', () => {
     const result = parseBackup(
-      backupToText({characters: [], activeId: null, hub: null}),
+      backupToText({ characters: [], activeId: null, hub: null }),
     );
 
     expect(result.ok).toBe(true);
     if (!result.ok) {
       return;
     }
-    expect(summarize(result.backup)).toEqual({characters: 0, hub: null});
+    expect(summarize(result.backup)).toEqual({ characters: 0, hub: null });
   });
 });
 
@@ -278,13 +292,19 @@ describe('store import', () => {
   });
 
   it('replaces the roster and the hub, and drops the undo slot', () => {
-    useCharacterStore.getState().addCharacter({...emptyCharacter(), name: 'Лишний'});
-    useCharacterStore.getState().createHub({...STARTING_HUBS.station});
+    useCharacterStore
+      .getState()
+      .addCharacter({ ...emptyCharacter(), name: 'Лишний' });
+    useCharacterStore.getState().createHub({ ...STARTING_HUBS.station });
     useCharacterStore.getState().removeHub();
     expect(useCharacterStore.getState().undoHub).not.toBeNull();
 
     const result = parseBackup(
-      backupToText({characters: [richCharacter()], activeId: 'char-1', hub: richHub()}),
+      backupToText({
+        characters: [richCharacter()],
+        activeId: 'char-1',
+        hub: richHub(),
+      }),
     );
     expect(result.ok).toBe(true);
     if (!result.ok) {

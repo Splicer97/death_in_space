@@ -1,20 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Pressable,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { Button, Empty, Ornament, Screen, Snackbar } from '../../components/ui';
 import { useCharacterStore } from '../../store/characterStore';
-import {
-  ABILITY_COLORS,
-  ABILITY_LABELS,
-  colors,
-} from '../../theme';
+import { ABILITY_COLORS, ABILITY_LABELS, colors } from '../../theme';
 import {
   defenseRating,
   availableSlots,
@@ -229,7 +219,9 @@ export default function RosterScreen({ navigation }: Props) {
         ListEmptyComponent={
           <Empty
             glyph="☠️"
-            text={'Персонажей пока нет.\nНажмите «+ ПЕРСОНАЖ», чтобы бросить кости.'}
+            text={
+              'Персонажей пока нет.\nНажмите «+ ПЕРСОНАЖ», чтобы бросить кости.'
+            }
           />
         }
       />

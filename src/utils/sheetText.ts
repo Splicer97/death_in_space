@@ -28,9 +28,8 @@ function moduleLine(item: InstalledModule): string {
 
 function weaponLine(label: string, weapon: Character['weapons'][0]): string {
   const maxUses = weapon.maxUses ?? weapon.uses;
-  const charges = weapon.uses > 0 || maxUses > 0
-    ? `, заряды ${weapon.uses}/${maxUses}`
-    : '';
+  const charges =
+    weapon.uses > 0 || maxUses > 0 ? `, заряды ${weapon.uses}/${maxUses}` : '';
   const body = `${weapon.name} (${weapon.damage})${charges}`;
   return line(label, weapon.ammo ? `${body}, патроны: ${weapon.ammo}` : body);
 }
@@ -67,7 +66,13 @@ export function characterToText(character: Character): string {
       ...character.voidCorruption.map(name => `• ${name}`),
     ]),
     section('СНАРЯЖЕНИЕ', [
-      line('Слоты предметов', `${availableSlots(character.abilities.body, character.armor)}/${itemSlots(character.abilities.body)}`),
+      line(
+        'Слоты предметов',
+        `${availableSlots(
+          character.abilities.body,
+          character.armor,
+        )}/${itemSlots(character.abilities.body)}`,
+      ),
       ...character.items.map(item => {
         const named = item.name.trim();
         if (!named) {
@@ -77,9 +82,14 @@ export function characterToText(character: Character): string {
           ? `• ${named} — состояние ${item.condition}`
           : `• ${named}`;
       }),
-      line('Мелочи', character.smallItems.map(item =>
-        item.count > 1 ? `${item.name} ×${item.count}` : item.name,
-      ).join(', ')),
+      line(
+        'Мелочи',
+        character.smallItems
+          .map(item =>
+            item.count > 1 ? `${item.name} ×${item.count}` : item.name,
+          )
+          .join(', '),
+      ),
       weaponLine('Оружие 1', character.weapons[0]),
       weaponLine('Оружие 2', character.weapons[1]),
       character.armor
@@ -99,10 +109,13 @@ export function characterToText(character: Character): string {
       line('Безделушка', character.trinket),
       line('Бонус', character.startingBonus),
     ]),
-    section('ЗАМЕТКИ', character.noteGroups.flatMap(group => [
-      group.title.trim() ? `ЗАМЕТКИ — ${group.title.trim()}` : 'ЗАМЕТКИ',
-      group.text,
-    ])),
+    section(
+      'ЗАМЕТКИ',
+      character.noteGroups.flatMap(group => [
+        group.title.trim() ? `ЗАМЕТКИ — ${group.title.trim()}` : 'ЗАМЕТКИ',
+        group.text,
+      ]),
+    ),
   ];
 
   return blocks.filter(Boolean).join('\n\n');

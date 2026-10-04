@@ -2,7 +2,7 @@ class MMKVMock {
   readonly id: string;
   private store = new Map<string, string | number | boolean>();
 
-  constructor(config?: {id?: string}) {
+  constructor(config?: { id?: string }) {
     this.id = config?.id ?? 'mmkv.default';
   }
 
@@ -48,7 +48,7 @@ class MMKVMock {
   trim(): void {}
 }
 
-export const createMMKV = (config?: {id?: string}) => new MMKVMock(config);
+export const createMMKV = (config?: { id?: string }) => new MMKVMock(config);
 export const existsMMKV = () => true;
 export const deleteMMKV = () => {};
-export default {createMMKV, existsMMKV, deleteMMKV};
+export default { createMMKV, existsMMKV, deleteMMKV };

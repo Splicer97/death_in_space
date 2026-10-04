@@ -1,10 +1,5 @@
 import type { Table } from './tables';
-import type {
-  Accessibility,
-  HubEnergy,
-  HubModule,
-  HubType,
-} from '../types';
+import type { Accessibility, HubEnergy, HubModule, HubType } from '../types';
 
 export const ENERGY_SYSTEMS: Record<HubType, HubEnergy[]> = {
   starship: [
@@ -814,7 +809,11 @@ export const HUB_MODULE_GROUPS: {
     title: 'ОБЩИЕ МОДУЛИ',
     subtitle: 'жильё, работа, торговля',
   },
-  { key: 'tech', title: 'ТЕХ-МОДУЛИ', subtitle: 'интерфейс, безопасность, наука' },
+  {
+    key: 'tech',
+    title: 'ТЕХ-МОДУЛИ',
+    subtitle: 'интерфейс, безопасность, наука',
+  },
   {
     key: 'boarding',
     title: 'БОЕВЫЕ · АБОРДАЖ',

@@ -1,7 +1,7 @@
-import React, {useMemo} from 'react';
-import {StyleSheet, useWindowDimensions, View} from 'react-native';
+import React, { useMemo } from 'react';
+import { StyleSheet, useWindowDimensions, View } from 'react-native';
 
-import {colors} from '../theme';
+import { colors } from '../theme';
 
 // Интенсивность фона. Подкрутите эти числа, если звёзды слишком заметны или незаметны.
 const STAR_COUNT = 58;
@@ -26,11 +26,17 @@ function random(seed: number): () => number {
   };
 }
 
-const TINTS = [colors.text, colors.text, colors.text, colors.violet, colors.blue];
+const TINTS = [
+  colors.text,
+  colors.text,
+  colors.text,
+  colors.violet,
+  colors.blue,
+];
 
 function makeStars(seed: number, count: number, scale: number): Star[] {
   const next = random(seed);
-  return Array.from({length: count}, () => {
+  return Array.from({ length: count }, () => {
     const size = (0.8 + next() * 1.7) * scale;
     const bright = next();
     return {
@@ -44,13 +50,14 @@ function makeStars(seed: number, count: number, scale: number): Star[] {
   });
 }
 
-function Stars({stars}: {stars: Star[]}) {
+function Stars({ stars }: { stars: Star[] }) {
   return (
     <View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={styles.layer}>
+      style={styles.layer}
+    >
       {stars.map((star, index) => (
         <View
           key={index}
@@ -103,7 +110,7 @@ function Glow({
 }) {
   const rings = useMemo(
     () =>
-      Array.from({length: GLOW_STEPS}, (_, index) => {
+      Array.from({ length: GLOW_STEPS }, (_, index) => {
         const step = (index + 1) / GLOW_STEPS;
         return {
           diameter: size * step,
@@ -114,7 +121,7 @@ function Glow({
   );
 
   return (
-    <View pointerEvents="none" style={[styles.glow, {left, top}]}>
+    <View pointerEvents="none" style={[styles.glow, { left, top }]}>
       {rings.map((ring, index) => (
         <View
           key={index}
@@ -149,9 +156,9 @@ function FractalBranch({
   const half = size / 2;
   const quarter = size / 4;
   const placements = [
-    [{rotate: '60deg'}, {translateX: quarter}, {translateY: -quarter}],
-    [{rotate: '-60deg'}, {translateX: quarter}, {translateY: quarter}],
-    [{translateY: half}],
+    [{ rotate: '60deg' }, { translateX: quarter }, { translateY: -quarter }],
+    [{ rotate: '-60deg' }, { translateX: quarter }, { translateY: quarter }],
+    [{ translateY: half }],
   ];
 
   return (
@@ -160,7 +167,8 @@ function FractalBranch({
         <View
           key={index}
           pointerEvents="none"
-          style={[styles.branch, {width: size, height: size, transform}]}>
+          style={[styles.branch, { width: size, height: size, transform }]}
+        >
           <View
             style={{
               width: half,
@@ -176,10 +184,23 @@ function FractalBranch({
   );
 }
 
-function VoidFractal({size, level, tint}: {size: number; level: number; tint: string}) {
+function VoidFractal({
+  size,
+  level,
+  tint,
+}: {
+  size: number;
+  level: number;
+  tint: string;
+}) {
   return (
-    <View pointerEvents="none" style={[styles.fractal, {width: size, height: size}]}>
-      <View style={{width: size, height: size, transform: [{rotate: '12deg'}]}}>
+    <View
+      pointerEvents="none"
+      style={[styles.fractal, { width: size, height: size }]}
+    >
+      <View
+        style={{ width: size, height: size, transform: [{ rotate: '12deg' }] }}
+      >
         <FractalBranch size={size} level={level} tint={tint} />
       </View>
     </View>
@@ -187,16 +208,23 @@ function VoidFractal({size, level, tint}: {size: number; level: number; tint: st
 }
 
 export function Starfield() {
-  const {width, height} = useWindowDimensions();
-  const far = useMemo(() => makeStars(7, Math.round(STAR_COUNT * 0.64), 0.8), []);
-  const near = useMemo(() => makeStars(31, Math.round(STAR_COUNT * 0.36), 1.3), []);
+  const { width, height } = useWindowDimensions();
+  const far = useMemo(
+    () => makeStars(7, Math.round(STAR_COUNT * 0.64), 0.8),
+    [],
+  );
+  const near = useMemo(
+    () => makeStars(31, Math.round(STAR_COUNT * 0.36), 1.3),
+    [],
+  );
 
   return (
     <View
       pointerEvents="none"
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      style={styles.field}>
+      style={styles.field}
+    >
       <Glow
         size={Math.min(width * 1.5, 620)}
         tint={colors.violet}
@@ -227,7 +255,8 @@ export function Starfield() {
             left: width - Math.min(width, 420) * 0.55,
             top: height * 0.72,
           },
-        ]}>
+        ]}
+      >
         <VoidFractal
           size={Math.min(width, 420)}
           level={FRACTAL_LEVEL}

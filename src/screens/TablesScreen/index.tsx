@@ -67,7 +67,8 @@ export default function TablesScreen() {
   const [query, setQuery] = useState('');
 
   const needle = query.trim().toLowerCase();
-  const matches = (text: string) => !needle || text.toLowerCase().includes(needle);
+  const matches = (text: string) =>
+    !needle || text.toLowerCase().includes(needle);
   const entriesOf = (table: Table) =>
     needle
       ? table.entries.filter(
@@ -77,24 +78,29 @@ export default function TablesScreen() {
 
   const filteredTables = TABLES.filter(
     table =>
-      matches(table.title) ||
-      table.entries.some(entry => matches(entry.text)),
+      matches(table.title) || table.entries.some(entry => matches(entry.text)),
   );
   const filteredHubTables = HUB_TABLES.filter(
     table =>
       matches(table.title) ||
-      table.entries.some(entry => matches(entry.text) || matches(entry.description ?? '')),
+      table.entries.some(
+        entry => matches(entry.text) || matches(entry.description ?? ''),
+      ),
   );
   const visibleOrigins = ORIGINS.filter(
     origin =>
       matches(origin.name) ||
       matches(origin.description) ||
-      origin.benefits.some(benefit => matches(benefit.name) || matches(benefit.description)),
+      origin.benefits.some(
+        benefit => matches(benefit.name) || matches(benefit.description),
+      ),
   );
   const visibleMutations = COSMIC_MUTATIONS.filter(
     mutation => matches(mutation.name) || matches(mutation.description),
   );
-  const visibleCorruptions = VOID_CORRUPTIONS.filter(item => matches(item.text));
+  const visibleCorruptions = VOID_CORRUPTIONS.filter(item =>
+    matches(item.text),
+  );
   const visibleNpcStarships = NPC_STARSHIPS.filter(
     item =>
       matches(item.type) ||
@@ -191,9 +197,7 @@ export default function TablesScreen() {
                         <View style={styles.flex}>
                           <Text style={styles.entryText}>{entry.text}</Text>
                           {entry.description ? (
-                            <Text style={styles.body}>
-                              {entry.description}
-                            </Text>
+                            <Text style={styles.body}>{entry.description}</Text>
                           ) : null}
                         </View>
                       </View>
@@ -302,9 +306,7 @@ export default function TablesScreen() {
                         <View style={styles.flex}>
                           <Text style={styles.entryText}>{entry.text}</Text>
                           {entry.description ? (
-                            <Text style={styles.body}>
-                              {entry.description}
-                            </Text>
+                            <Text style={styles.body}>{entry.description}</Text>
                           ) : null}
                         </View>
                       </View>

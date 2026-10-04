@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
     flexShrink: 1,
     textAlign: 'right',
   },
-  searchWrap: {paddingHorizontal: spacing.lg},
+  searchWrap: { paddingHorizontal: spacing.lg },
   bullet: {
     color: colors.textDim,
     fontSize: font.small,

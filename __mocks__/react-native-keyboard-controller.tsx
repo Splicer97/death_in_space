@@ -1,7 +1,7 @@
 import React from 'react';
-import {View} from 'react-native';
+import { View } from 'react-native';
 
-function KeyboardProvider({children}: {children: React.ReactNode}) {
+function KeyboardProvider({ children }: { children: React.ReactNode }) {
   return <View>{children}</View>;
 }
 
@@ -9,5 +9,5 @@ function KeyboardAwareScrollView(props: Record<string, unknown>) {
   return <View {...props} />;
 }
 
-export {KeyboardProvider, KeyboardAwareScrollView};
+export { KeyboardProvider, KeyboardAwareScrollView };
 export default KeyboardAwareScrollView;

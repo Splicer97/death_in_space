@@ -1,16 +1,21 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Alert,
-  ScrollView,
-  Share,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, ScrollView, Share, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Button, Card, Field, Screen, SectionTitle, Snackbar } from '../../components/ui';
+import {
+  Button,
+  Card,
+  Field,
+  Screen,
+  SectionTitle,
+  Snackbar,
+} from '../../components/ui';
 import { useCharacterStore } from '../../store/characterStore';
-import { backupToText, parseBackup, type BackupSummary } from '../../utils/backup';
+import {
+  backupToText,
+  parseBackup,
+  type BackupSummary,
+} from '../../utils/backup';
 import type { RootStackParamList } from '../../navigation/types';
 import { styles } from './styles';
 
@@ -42,12 +47,13 @@ export default function DataScreen(_props: Props) {
   const hub = useCharacterStore(state => state.hub);
   const importBackup = useCharacterStore(state => state.importBackup);
   const [text, setText] = useState('');
-  const [result, setResult] = useState<{characters: number; hub: string | null} | null>(
-    null,
-  );
+  const [result, setResult] = useState<{
+    characters: number;
+    hub: string | null;
+  } | null>(null);
 
   const current = useMemo(
-    () => describe({characters: characters.length, hub: hub?.hull ?? null}),
+    () => describe({ characters: characters.length, hub: hub?.hull ?? null }),
     [characters.length, hub],
   );
 
@@ -56,7 +62,7 @@ export default function DataScreen(_props: Props) {
   const exportBackup = useCallback(() => {
     Share.share({
       title: 'Резервная копия',
-      message: backupToText({characters, activeId, hub}),
+      message: backupToText({ characters, activeId, hub }),
     });
   }, [activeId, characters, hub]);
 
@@ -71,7 +77,7 @@ export default function DataScreen(_props: Props) {
         check.summary,
       )}.`,
       [
-        {text: 'Отмена', style: 'cancel'},
+        { text: 'Отмена', style: 'cancel' },
         {
           text: 'Заменить',
           style: 'destructive',
@@ -87,15 +93,19 @@ export default function DataScreen(_props: Props) {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
         <Card style={styles.card}>
           <SectionTitle
             title="РЕЗЕРВНАЯ КОПИЯ"
             subtitle={`Сейчас в приложении: ${current}`}
           />
           <Text style={styles.text}>
-            Копия содержит всех персонажей и хаб одним текстом. Отправьте его себе в
-            мессенджер, почту или заметки — вернуть данные можно в любой момент.
+            Копия содержит всех персонажей и хаб одним текстом. Отправьте его
+            себе в мессенджер, почту или заметки — вернуть данные можно в любой
+            момент.
           </Text>
           <Button title="ПОДЕЛИТЬСЯ КОПИЕЙ" onPress={exportBackup} />
         </Card>
@@ -146,8 +156,8 @@ export default function DataScreen(_props: Props) {
             />
           </View>
           <Text style={styles.hint}>
-            Импорт заменяет текущих персонажей и хаб целиком. Сделайте копию перед
-            заменой, если текущие данные ещё нужны.
+            Импорт заменяет текущих персонажей и хаб целиком. Сделайте копию
+            перед заменой, если текущие данные ещё нужны.
           </Text>
         </Card>
       </ScrollView>

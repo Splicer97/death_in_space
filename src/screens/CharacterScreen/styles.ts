@@ -48,8 +48,8 @@ export const styles = StyleSheet.create({
     fontSize: font.body,
     fontWeight: '800',
   },
-  headerButtons: {flexDirection: 'row', alignItems: 'center'},
-  spacer: {height: spacing.sm},
+  headerButtons: { flexDirection: 'row', alignItems: 'center' },
+  spacer: { height: spacing.sm },
   shareButton: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     marginRight: spacing.sm,
   },
-  shareButtonText: {color: colors.textDim, fontSize: font.body},
+  shareButtonText: { color: colors.textDim, fontSize: font.body },
   headerStats: {
     flexDirection: 'row',
     marginTop: spacing.md,
