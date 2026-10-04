@@ -33,12 +33,14 @@ export interface Item {
 export interface SmallItem {
   name: string;
   count: number;
+  condition?: number;
 }
 
 export interface Weapon {
   name: string;
   damage: string;
   uses: number;
+  maxUses?: number;
   condition: number;
   ammo?: string;
 }

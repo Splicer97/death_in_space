@@ -29,6 +29,17 @@ function sampleCharacter(): Character {
       {name: 'Кружка', count: 1},
       {name: 'Шоколадный батончик', count: 3},
     ],
+    weapons: [
+      {
+        name: 'Импульсный пистолет',
+        damage: '1d6',
+        uses: 3,
+        maxUses: 12,
+        condition: 2,
+        ammo: '1d4×10 · 40/40',
+      },
+      {name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: ''},
+    ],
   };
 }
 
@@ -63,6 +74,24 @@ describe('character sheet export', () => {
     expect(text).toContain('Дробовик — состояние 3');
     expect(text).toContain('Плазменный нож — состояние 2');
     expect(text).toContain('Слоты предметов: 13/13');
+  });
+
+  it('lists weapon charges as current/maximum', () => {
+    const text = characterToText(sampleCharacter());
+
+    expect(text).toContain('Импульсный пистолет (1d6)');
+    expect(text).toContain('заряды 3/12');
+    expect(text).toContain('патроны: 1d4×10 · 40/40');
+  });
+
+  it('omits condition for items without tracking', () => {
+    const text = characterToText({
+      ...sampleCharacter(),
+      items: [{id: 'i1', name: 'Скафандр', condition: 0}],
+    });
+
+    expect(text).toContain('• Скафандр');
+    expect(text).not.toContain('состояние 0');
   });
 
   it('keeps currency and note groups', () => {

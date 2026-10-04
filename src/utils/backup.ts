@@ -60,10 +60,16 @@ function recordList(value: unknown): Raw[] {
 }
 
 function smallItemList(value: unknown): Character['smallItems'] {
-  const collect = (name: unknown, amount: unknown) => {
+  const collect = (name: unknown, amount: unknown, state?: unknown) => {
     const trimmed = text(name, '').trim();
     const total = Math.max(1, count(amount, 1)) || 1;
-    return trimmed ? {name: trimmed, count: total} : null;
+    if (!trimmed) {
+      return null;
+    }
+    const condition = count(state);
+    return condition > 0
+      ? {name: trimmed, count: total, condition}
+      : {name: trimmed, count: total};
   };
   if (Array.isArray(value)) {
     return value
@@ -71,7 +77,7 @@ function smallItemList(value: unknown): Character['smallItems'] {
         if (typeof entry === 'string') {
           return collect(entry, 1);
         }
-        return isRaw(entry) ? collect(entry.name, entry.count) : null;
+        return isRaw(entry) ? collect(entry.name, entry.count, entry.condition) : null;
       })
       .filter((entry): entry is Character['smallItems'][number] => entry !== null);
   }
@@ -97,10 +103,12 @@ function sanitizeWeapon(raw: Raw | undefined, fallback: Weapon): Weapon {
   if (!raw) {
     return { ...fallback };
   }
+  const uses = count(raw.uses);
   return {
     name: text(raw.name),
     damage: text(raw.damage),
-    uses: count(raw.uses),
+    uses,
+    maxUses: count(raw.maxUses, uses),
     condition: count(raw.condition),
     ammo: text(raw.ammo),
   };

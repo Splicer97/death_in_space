@@ -27,7 +27,11 @@ function moduleLine(item: InstalledModule): string {
 }
 
 function weaponLine(label: string, weapon: Character['weapons'][0]): string {
-  const body = `${weapon.name} (${weapon.damage}), состояние ${weapon.condition}/${weapon.uses}`;
+  const maxUses = weapon.maxUses ?? weapon.uses;
+  const charges = weapon.uses > 0 || maxUses > 0
+    ? `, заряды ${weapon.uses}/${maxUses}`
+    : '';
+  const body = `${weapon.name} (${weapon.damage})${charges}`;
   return line(label, weapon.ammo ? `${body}, патроны: ${weapon.ammo}` : body);
 }
 
@@ -64,7 +68,15 @@ export function characterToText(character: Character): string {
     ]),
     section('СНАРЯЖЕНИЕ', [
       line('Слоты предметов', `${availableSlots(character.abilities.body, character.armor)}/${itemSlots(character.abilities.body)}`),
-      ...character.items.map(item => `• ${item.name} — состояние ${item.condition}`),
+      ...character.items.map(item => {
+        const named = item.name.trim();
+        if (!named) {
+          return '';
+        }
+        return item.condition > 0
+          ? `• ${named} — состояние ${item.condition}`
+          : `• ${named}`;
+      }),
       line('Мелочи', character.smallItems.map(item =>
         item.count > 1 ? `${item.name} ×${item.count}` : item.name,
       ).join(', ')),

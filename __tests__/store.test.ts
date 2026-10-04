@@ -140,7 +140,7 @@ describe('storage migration', () => {
     });
   });
 
-  it('converts a v1 snapshot into the v4 shape', async () => {
+  it('converts a v1 snapshot into the v5 shape', async () => {
     storage.set(
       'characters',
       JSON.stringify({
@@ -182,13 +182,14 @@ describe('storage migration', () => {
       name: 'Пистолет',
       damage: '1d6',
       uses: 4,
+      maxUses: 4,
       condition: 2,
       ammo: '',
     });
     expect(character.weapons[1].ammo).toBe('');
     expect(
       JSON.parse(storage.getString('characters') as string).version,
-    ).toBe(4);
+    ).toBe(5);
   });
 
   it('keeps a single-line v1 smallItems as one entry', async () => {
@@ -330,6 +331,52 @@ describe('storage migration', () => {
       {id: 'n1', title: 'Цели', text: 'Отдать долг'},
       {id: 'n2', title: 'Мастеру', text: 'Нужен нож'},
     ]);
+  });
+
+  it('keeps small-item condition and weapon max charges from v4', async () => {
+    storage.set(
+      'characters',
+      JSON.stringify({
+        state: {
+          characters: [
+            {
+              id: 'a',
+              name: 'Вейн',
+              smallItems: [
+                {name: 'Датчик', count: 2, condition: 4},
+                {name: 'Кружка', count: 1},
+              ],
+              weapons: [
+                {name: 'Пистолет', damage: '1d6', uses: 3, maxUses: 8, condition: 2},
+              ],
+            },
+          ],
+          activeId: 'a',
+          hub: null,
+        },
+        version: 4,
+      }),
+    );
+
+    const restored = createCharacterStore();
+    await restored.persist.rehydrate();
+
+    const [character] = restored.getState().characters;
+    expect(character.smallItems).toEqual([
+      {name: 'Датчик', count: 2, condition: 4},
+      {name: 'Кружка', count: 1},
+    ]);
+    expect(character.weapons[0]).toEqual({
+      name: 'Пистолет',
+      damage: '1d6',
+      uses: 3,
+      maxUses: 8,
+      condition: 2,
+      ammo: '',
+    });
+    expect(
+      JSON.parse(storage.getString('characters') as string).version,
+    ).toBe(5);
   });
 });
 

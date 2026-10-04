@@ -36,11 +36,13 @@ export function normalizeWeapons(
   const list = Array.isArray(raw) ? raw : [];
   return [0, 1].map(index => {
     const recordItem = record(list[index]);
+    const uses = count(recordItem?.uses);
     return {
       ...fallback[index],
       name: text(recordItem?.name),
       damage: text(recordItem?.damage),
-      uses: count(recordItem?.uses),
+      uses,
+      maxUses: count(recordItem?.maxUses, uses),
       condition: count(recordItem?.condition),
       ammo: text(recordItem?.ammo),
     };
@@ -48,10 +50,20 @@ export function normalizeWeapons(
 }
 
 export function normalizeSmallItems(raw: unknown): SmallItem[] {
-  const collect = (name: string, amount: number): SmallItem | null => {
+  const collect = (
+    name: string,
+    amount: number,
+    state?: unknown,
+  ): SmallItem | null => {
     const trimmed = name.trim();
     const total = Math.max(1, Math.round(amount) || 1);
-    return trimmed ? { name: trimmed, count: total } : null;
+    if (!trimmed) {
+      return null;
+    }
+    const condition = count(state);
+    return condition > 0
+      ? { name: trimmed, count: total, condition }
+      : { name: trimmed, count: total };
   };
   if (Array.isArray(raw)) {
     return raw
@@ -63,7 +75,7 @@ export function normalizeSmallItems(raw: unknown): SmallItem[] {
         if (!entry) {
           return null;
         }
-        return collect(text(entry.name), count(entry.count, 1));
+        return collect(text(entry.name), count(entry.count, 1), entry.condition);
       })
       .filter((item): item is SmallItem => item !== null);
   }

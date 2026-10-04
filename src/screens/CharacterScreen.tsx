@@ -29,7 +29,13 @@ import { TablePicker } from '../components/TablePicker';
 import { ARMOR_PRESETS } from '../data/armor';
 import { findOrigin, ORIGINS } from '../data/origins';
 import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../data/mutations';
-import { DRIVES, LOOKS, PAST_ALLEGIANCES, TRAITS } from '../data/tables';
+import {
+  BACKGROUNDS,
+  DRIVES,
+  LOOKS,
+  PAST_ALLEGIANCES,
+  TRAITS,
+} from '../data/tables';
 import type { TableEntry } from '../data/tables';
 import {
   emptyCharacter,
@@ -315,6 +321,18 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 label="ПРЕДЫСТОРИЯ (d20)"
                 value={character.background}
                 onChangeText={background => set({ background })}
+              />
+              <SelectFromTable
+                label="ПРЕДЫСТОРИЯ (d20)"
+                onOpen={() =>
+                  setTablePicker({
+                    title: 'ПРЕДЫСТОРИЯ',
+                    die: 'd20',
+                    entries: BACKGROUNDS,
+                    current: character.background,
+                    onSelect: background => set({ background }),
+                  })
+                }
               />
               <Field
                 label="БЫВШАЯ ПРЕДАННОСТЬ (d6)"
@@ -677,6 +695,53 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       placeholderTextColor={colors.textFaint}
                       style={[styles.itemInput, styles.flex]}
                     />
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        item.condition > 0
+                          ? 'Убрать состояние'
+                          : 'Добавить состояние'
+                      }
+                      onPress={() =>
+                        set({
+                          items: character.items.map(current =>
+                            current.id === item.id
+                              ? {
+                                  ...current,
+                                  condition:
+                                    current.condition > 0
+                                      ? 0
+                                      : MAX_WEAPON_CONDITION,
+                                }
+                              : current,
+                          ),
+                        })
+                      }
+                      style={[
+                        styles.conditionToggle,
+                        item.condition > 0 && styles.conditionToggleOn,
+                      ]}
+                    >
+                      <Text style={styles.conditionToggleText}>
+                        {item.condition > 0 ? 'СОСТ' : '+ СОСТ'}
+                      </Text>
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Удалить предмет"
+                      onPress={() =>
+                        set({
+                          items: character.items.filter(
+                            current => current.id !== item.id,
+                          ),
+                        })
+                      }
+                      style={styles.removeButton}
+                    >
+                      <Text style={styles.listRemove}>✕</Text>
+                    </Pressable>
+                  </View>
+                  {item.condition > 0 ? (
                     <View style={styles.conditionBox}>
                       {[1, 2, 3, 4, 5].map(level => (
                         <Pressable
@@ -693,31 +758,17 @@ export default function CharacterScreen({ navigation, route }: Props) {
                                         level === item.condition ? 0 : level,
                                     }
                                   : current,
-                            ),
-                          })
-                        }
-                        style={[
-                          styles.conditionCell,
-                          item.condition >= level && styles.conditionCellOn,
-                        ]}
-                      />
+                              ),
+                            })
+                          }
+                          style={[
+                            styles.conditionCell,
+                            item.condition >= level && styles.conditionCellOn,
+                          ]}
+                        />
                       ))}
                     </View>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel="Удалить предмет"
-                      onPress={() =>
-                        set({
-                          items: character.items.filter(
-                            current => current.id !== item.id,
-                          ),
-                        })
-                      }
-                      style={styles.removeButton}
-                    >
-                      <Text style={styles.listRemove}>✕</Text>
-                    </Pressable>
-                  </View>
+                  ) : null}
                   <View style={styles.itemWeight}>
                     <Text style={styles.itemWeightLabel}>ВЕС</Text>
                     <Pressable
@@ -792,65 +843,148 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       key={`${item.name}-${index}`}
                       style={styles.smallItemCell}
                     >
-                      <Text style={styles.smallItemText} numberOfLines={1}>
-                        {item.name}
-                      </Text>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Меньше: ${item.name}`}
-                        onPress={() =>
-                          set({
-                            smallItems: character.smallItems.map(
-                              (current, itemIndex) =>
-                                itemIndex === index
-                                  ? {
-                                      ...current,
-                                      count: Math.max(1, current.count - 1),
-                                    }
-                                  : current,
-                            ),
-                          })
-                        }
-                        style={styles.smallItemStepper}
-                      >
-                        <Text style={styles.smallItemCountSign}>−</Text>
-                      </Pressable>
-                      <Text style={styles.smallItemCount}>
-                        {item.count}
-                      </Text>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Больше: ${item.name}`}
-                        onPress={() =>
-                          set({
-                            smallItems: character.smallItems.map(
-                              (current, itemIndex) =>
-                                itemIndex === index
-                                  ? {
-                                      ...current,
-                                      count: Math.min(999, current.count + 1),
-                                    }
-                                  : current,
-                            ),
-                          })
-                        }
-                        style={styles.smallItemStepper}
-                      >
-                        <Text style={styles.smallItemCountSign}>+</Text>
-                      </Pressable>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Удалить: ${item.name}`}
-                        onPress={() =>
-                          set({
-                            smallItems: character.smallItems.filter(
-                              (_, itemIndex) => itemIndex !== index,
-                            ),
-                          })
-                        }
-                      >
-                        <Text style={styles.smallItemRemove}>✕</Text>
-                      </Pressable>
+                      <View style={styles.smallItemRow}>
+                        <TextInput
+                          value={item.name}
+                          onChangeText={name =>
+                            set({
+                              smallItems: character.smallItems.map(
+                                (current, itemIndex) =>
+                                  itemIndex === index
+                                    ? { ...current, name }
+                                    : current,
+                              ),
+                            })
+                          }
+                          placeholder="Мелкий предмет"
+                          placeholderTextColor={colors.textFaint}
+                          style={[styles.smallItemInput, styles.flex]}
+                        />
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={
+                            item.condition
+                              ? 'Убрать состояние'
+                              : 'Добавить состояние'
+                          }
+                          onPress={() =>
+                            set({
+                              smallItems: character.smallItems.map(
+                                (current, itemIndex) =>
+                                  itemIndex === index
+                                    ? {
+                                        ...current,
+                                        condition: current.condition
+                                          ? 0
+                                          : MAX_WEAPON_CONDITION,
+                                      }
+                                    : current,
+                              ),
+                            })
+                          }
+                          style={[
+                            styles.conditionToggle,
+                            item.condition != null &&
+                              item.condition > 0 &&
+                              styles.conditionToggleOn,
+                          ]}
+                        >
+                          <Text style={styles.conditionToggleText}>
+                            {item.condition != null && item.condition > 0
+                              ? 'СОСТ'
+                              : '+ СОСТ'}
+                          </Text>
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Меньше: ${item.name}`}
+                          onPress={() =>
+                            set({
+                              smallItems: character.smallItems.map(
+                                (current, itemIndex) =>
+                                  itemIndex === index
+                                    ? {
+                                        ...current,
+                                        count: Math.max(1, current.count - 1),
+                                      }
+                                    : current,
+                              ),
+                            })
+                          }
+                          style={styles.smallItemStepper}
+                        >
+                          <Text style={styles.smallItemCountSign}>−</Text>
+                        </Pressable>
+                        <Text style={styles.smallItemCount}>
+                          {item.count}
+                        </Text>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Больше: ${item.name}`}
+                          onPress={() =>
+                            set({
+                              smallItems: character.smallItems.map(
+                                (current, itemIndex) =>
+                                  itemIndex === index
+                                    ? {
+                                        ...current,
+                                        count: Math.min(999, current.count + 1),
+                                      }
+                                    : current,
+                              ),
+                            })
+                          }
+                          style={styles.smallItemStepper}
+                        >
+                          <Text style={styles.smallItemCountSign}>+</Text>
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Удалить: ${item.name}`}
+                          onPress={() =>
+                            set({
+                              smallItems: character.smallItems.filter(
+                                (_, itemIndex) => itemIndex !== index,
+                              ),
+                            })
+                          }
+                        >
+                          <Text style={styles.smallItemRemove}>✕</Text>
+                        </Pressable>
+                      </View>
+                      {item.condition != null && item.condition > 0 ? (
+                        <View style={styles.conditionBox}>
+                          {[1, 2, 3, 4, 5].map(level => (
+                            <Pressable
+                              key={level}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Состояние ${level}`}
+                              onPress={() =>
+                                set({
+                                  smallItems: character.smallItems.map(
+                                    (current, itemIndex) =>
+                                      itemIndex === index
+                                        ? {
+                                            ...current,
+                                            condition:
+                                              level === item.condition
+                                                ? 0
+                                                : level,
+                                          }
+                                        : current,
+                                  ),
+                                })
+                              }
+                              style={[
+                                styles.conditionCell,
+                                item.condition != null &&
+                                  item.condition >= level &&
+                                  styles.conditionCellOn,
+                              ]}
+                            />
+                          ))}
+                        </View>
+                      ) : null}
                     </View>
                   ))}
                 </View>
@@ -888,49 +1022,69 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       })
                     }
                   />
-                  <View style={styles.row}>
-                    <Field
-                      style={styles.weaponHalf}
-                      label="УРОН"
-                      value={weapon.damage}
-                      onChangeText={damage =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            damage,
-                          }),
-                        })
-                      }
-                      placeholder="1d6"
-                    />
-                    <Field
-                      style={styles.weaponHalf}
-                      label="ЗАРЯДЫ"
-                      value={weapon.uses ? String(weapon.uses) : ''}
-                      onChangeText={value =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            uses: parseInt(value, 10) || 0,
-                          }),
-                        })
-                      }
-                      keyboardType="number-pad"
-                    />
-                  </View>
-                  <Field
-                    label="ПАТРОНЫ"
-                    value={weapon.ammo ?? ''}
-                    onChangeText={ammo =>
-                      set({
-                        weapons: replaceWeapon(character.weapons, index, {
-                          ...weapon,
-                          ammo,
-                        }),
-                      })
-                    }
-                    placeholder="1d4×10 · 40/40"
-                  />
+<View style={styles.row}>
+                      <Field
+                        style={styles.weaponHalf}
+                        label="УРОН"
+                        value={weapon.damage}
+                        onChangeText={damage =>
+                          set({
+                            weapons: replaceWeapon(character.weapons, index, {
+                              ...weapon,
+                              damage,
+                            }),
+                          })
+                        }
+                        placeholder="1d6"
+                      />
+                      <Field
+                        style={styles.weaponHalf}
+                        label="В ОБОЙМЕ СЕЙЧАС"
+                        value={weapon.uses ? String(weapon.uses) : ''}
+                        onChangeText={value =>
+                          set({
+                            weapons: replaceWeapon(character.weapons, index, {
+                              ...weapon,
+                              uses: parseInt(value, 10) || 0,
+                            }),
+                          })
+                        }
+                        keyboardType="number-pad"
+                      />
+                    </View>
+                    <View style={styles.row}>
+                      <Field
+                        style={styles.weaponHalf}
+                        label="В ОБОЙМЕ МАКСИМУМ"
+                        value={
+                          weapon.maxUses != null && weapon.maxUses > 0
+                            ? String(weapon.maxUses)
+                            : ''
+                        }
+                        onChangeText={value =>
+                          set({
+                            weapons: replaceWeapon(character.weapons, index, {
+                              ...weapon,
+                              maxUses: parseInt(value, 10) || 0,
+                            }),
+                          })
+                        }
+                        keyboardType="number-pad"
+                      />
+                      <Field
+                        style={styles.weaponHalf}
+                        label="ВСЕГО ПАТРОН"
+                        value={weapon.ammo ?? ''}
+                        onChangeText={ammo =>
+                          set({
+                            weapons: replaceWeapon(character.weapons, index, {
+                              ...weapon,
+                              ammo,
+                            }),
+                          })
+                        }
+                      />
+                    </View>
                   <Text style={styles.subLabel}>СОСТОЯНИЕ</Text>
                   <Track
                     value={weapon.condition}
@@ -1628,8 +1782,7 @@ const styles = StyleSheet.create({
   },
   smallItemsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
   smallItemCell: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: 'column',
     backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     borderWidth: 1,
@@ -1640,10 +1793,15 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     maxWidth: '100%',
   },
-  smallItemText: {
+  smallItemRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  smallItemInput: {
     color: colors.text,
     fontSize: font.small,
     flexShrink: 1,
+    minWidth: 60,
     paddingHorizontal: spacing.xs,
   },
   smallItemCount: {
@@ -1692,6 +1850,25 @@ const styles = StyleSheet.create({
     marginHorizontal: 1,
   },
   conditionCellOn: { backgroundColor: colors.green, borderColor: colors.green },
+  conditionToggle: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs + 2,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    marginRight: spacing.xs,
+  },
+  conditionToggleOn: {
+    borderColor: colors.green,
+    backgroundColor: colors.surfaceAlt,
+  },
+  conditionToggleText: {
+    color: colors.textFaint,
+    fontSize: font.tiny,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
   removeButton: { paddingHorizontal: spacing.sm },
   weaponBox: { marginBottom: spacing.lg },
   weaponHalf: { flex: 1, marginRight: spacing.sm },

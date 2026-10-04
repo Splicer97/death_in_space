@@ -501,6 +501,106 @@ describe('character sheet', () => {
     ]);
   });
 
+  it('edits a small item name and toggles its condition', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        smallItems: [{name: 'Болт', count: 1}],
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ВЕЩИ');
+
+    const nameInput = tree.root.findAll(
+      node => node.props?.value === 'Болт',
+      { deep: true },
+    )[0];
+    expect(nameInput).toBeDefined();
+    act(() => {
+      nameInput.props.onChangeText('Гайка');
+    });
+
+    const toggle = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Добавить состояние',
+      { deep: true },
+    )[0];
+    expect(toggle).toBeDefined();
+    act(() => {
+      toggle.props.onPress();
+    });
+    expect(
+      useCharacterStore.getState().characters[0].smallItems,
+    ).toEqual([{name: 'Гайка', count: 1, condition: 5}]);
+
+    const levelThree = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Состояние 3',
+      { deep: true },
+    )[0];
+    act(() => {
+      levelThree.props.onPress();
+    });
+    expect(
+      useCharacterStore.getState().characters[0].smallItems,
+    ).toEqual([{name: 'Гайка', count: 1, condition: 3}]);
+  });
+
+  it('turns an item condition off and back on', () => {
+    const id = useCharacterStore.getState().activeId as string;
+    act(() => {
+      useCharacterStore.getState().updateCharacter(id, {
+        items: [{id: 'i1', name: 'Скафандр', condition: 0, weight: 0}],
+      });
+    });
+
+    const { nav } = makeNav<CharacterProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <CharacterScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Character', params: { id } }}
+        />,
+      );
+    });
+
+    press(tree.root, 'ВЕЩИ');
+
+    let toggle = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Добавить состояние',
+      { deep: true },
+    )[0];
+    expect(toggle).toBeDefined();
+    act(() => {
+      toggle.props.onPress();
+    });
+    expect(
+      useCharacterStore.getState().characters[0].items[0].condition,
+    ).toBe(5);
+
+    toggle = tree.root.findAll(
+      node => node.props?.accessibilityLabel === 'Убрать состояние',
+      { deep: true },
+    )[0];
+    expect(toggle).toBeDefined();
+    act(() => {
+      toggle.props.onPress();
+    });
+    expect(
+      useCharacterStore.getState().characters[0].items[0].condition,
+    ).toBe(0);
+  });
+
   it('opens the dice roller', () => {
     const id = useCharacterStore.getState().activeId as string;
     const { nav, calls } = makeNav<CharacterProps['navigation']>();

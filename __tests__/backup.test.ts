@@ -43,10 +43,11 @@ function richCharacter(): Character {
         name: 'Плазменный пистолет',
         damage: '1d6+1',
         uses: 4,
+        maxUses: 12,
         condition: 3,
         ammo: '1d4×10 · 40/40',
       },
-      {name: 'Мачете', damage: '1d8', uses: 3, condition: 1, ammo: ''},
+      {name: 'Мачете', damage: '1d8', uses: 3, maxUses: 3, condition: 1, ammo: ''},
     ],
     armor: {
       type: 'Скафандр',
