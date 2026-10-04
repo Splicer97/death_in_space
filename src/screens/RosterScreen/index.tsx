@@ -3,31 +3,27 @@ import {
   Alert,
   FlatList,
   Pressable,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Button, Empty, Ornament, Screen, Snackbar } from '../components/ui';
-import { useCharacterStore } from '../store/characterStore';
+import { Button, Empty, Ornament, Screen, Snackbar } from '../../components/ui';
+import { useCharacterStore } from '../../store/characterStore';
 import {
   ABILITY_COLORS,
   ABILITY_LABELS,
   colors,
-  font,
-  radius,
-  shadow,
-  spacing,
-} from '../theme';
+} from '../../theme';
 import {
   defenseRating,
   availableSlots,
   type AbilityKey,
   type Character,
-} from '../types';
-import { findOrigin } from '../data/origins';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../types';
+import { findOrigin } from '../../data/origins';
+import type { RootStackParamList } from '../../navigation/types';
+import { styles } from './styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Roster'>;
 
@@ -267,138 +263,3 @@ function Stat({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  list: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  flex: { flex: 1 },
-  header: { marginBottom: spacing.lg },
-  titleRow: { flexDirection: 'row', alignItems: 'center' },
-  titleMarkHalo: {
-    position: 'absolute',
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    borderWidth: 1,
-    borderColor: colors.yellowDim,
-    opacity: 0.3,
-  },
-  titleMark: {
-    width: 46,
-    height: 46,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.yellowDim,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  titleMarkText: { color: colors.yellow, fontSize: 20 },
-  title: {
-    color: colors.yellow,
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: 3,
-  },
-  subtitle: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 2,
-    marginTop: 3,
-  },
-  tagline: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 1,
-    marginTop: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  hint: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    lineHeight: 15,
-    marginTop: spacing.sm,
-  },
-  headerActions: { flexDirection: 'row' },
-  headerButton: {
-    flex: 1,
-    marginRight: spacing.sm,
-    borderWidth: 2,
-    paddingHorizontal: spacing.xs,
-  },
-  headerTab: { borderColor: colors.text },
-  tabText: { fontSize: font.small, letterSpacing: 0.4 },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    marginBottom: spacing.md,
-    ...shadow.card,
-  },
-  pressed: { opacity: 0.7 },
-  dataButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dataButtonText: { color: colors.yellow, fontSize: 18, fontWeight: '800' },
-  cardTop: { flexDirection: 'row', alignItems: 'center' },
-  avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  portrait: { fontSize: 26 },
-  cardInfo: { flex: 1 },
-  name: { color: colors.text, fontSize: 18, fontWeight: '800' },
-  cardSubtitle: { color: colors.textDim, fontSize: font.small, marginTop: 2 },
-  stats: { flexDirection: 'row', marginTop: spacing.lg },
-  stat: {
-    flex: 1,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
-    marginRight: spacing.sm,
-    alignItems: 'center',
-  },
-  statLast: { marginRight: 0 },
-  statValue: { color: colors.text, fontSize: font.heading, fontWeight: '800' },
-  statLabel: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  abilities: { flexDirection: 'row', marginTop: spacing.lg },
-  ability: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: radius.md,
-    paddingVertical: spacing.xs + 1,
-    marginRight: spacing.xs,
-    alignItems: 'center',
-  },
-  abilityValue: { fontSize: font.heading, fontWeight: '800' },
-  abilityLabel: {
-    color: colors.textFaint,
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginTop: 1,
-  },
-  slots: { marginTop: spacing.md },
-  slotsText: { color: colors.textFaint, fontSize: font.tiny, letterSpacing: 1 },
-  deleteRow: { flexDirection: 'row', marginTop: spacing.md },
-});

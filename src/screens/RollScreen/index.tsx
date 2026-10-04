@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import { Button, Card, Chip, Screen, SectionTitle } from '../components/ui';
-import { selectCharacter, useCharacterStore } from '../store/characterStore';
-import { ABILITY_LABELS, colors, font, radius, spacing } from '../theme';
-import { defenseRating, type AbilityKey } from '../types';
+import { Button, Card, Chip, Screen, SectionTitle } from '../../components/ui';
+import { selectCharacter, useCharacterStore } from '../../store/characterStore';
+import { ABILITY_LABELS, colors } from '../../theme';
+import { defenseRating, type AbilityKey } from '../../types';
 import {
   formatRoll,
   performRoll,
@@ -13,8 +13,9 @@ import {
   sum,
   type ModifierMode,
   type RollResult,
-} from '../utils/dice';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../utils/dice';
+import type { RootStackParamList } from '../../navigation/types';
+import { styles } from './styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Roll'>;
 
@@ -192,65 +193,3 @@ export default function RollScreen({ route }: Props) {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  subLabel: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  row: { flexDirection: 'row', flexWrap: 'wrap' },
-  rollButton: { marginTop: spacing.lg },
-  total: {
-    color: colors.yellow,
-    fontSize: 64,
-    fontWeight: '900',
-    textAlign: 'center',
-  },
-  formula: {
-    color: colors.text,
-    fontSize: font.body,
-    textAlign: 'center',
-    marginTop: spacing.xs,
-  },
-  verdict: {
-    fontSize: font.heading,
-    fontWeight: '800',
-    letterSpacing: 2,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-  note: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    textAlign: 'center',
-    marginTop: spacing.sm,
-  },
-  dieBox: {
-    width: 68,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  dieValue: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  dieLabel: { color: colors.textFaint, fontSize: font.tiny, letterSpacing: 1 },
-  historyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    paddingVertical: spacing.xs,
-  },
-  historyText: { color: colors.textDim, fontSize: font.small },
-  historyVerdict: { fontSize: font.tiny, fontWeight: '800' },
-});

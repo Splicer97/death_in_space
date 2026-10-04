@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import {
   Card,
@@ -8,22 +8,23 @@ import {
   Screen,
   SearchInput,
   SectionTitle,
-} from '../components/ui';
-import { Track } from '../components/Track';
-import { DERIVED_HINTS, RULES } from '../data/armor';
-import { ORIGINS } from '../data/origins';
-import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../data/mutations';
-import { HUB_TABLES, NPC_STARSHIPS, NPC_STATIONS } from '../data/hub';
-import { TABLES, type Table } from '../data/tables';
-import { colors, font, radius, spacing } from '../theme';
+} from '../../components/ui';
+import { Track } from '../../components/Track';
+import { DERIVED_HINTS, RULES } from '../../data/armor';
+import { ORIGINS } from '../../data/origins';
+import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../../data/mutations';
+import { HUB_TABLES, NPC_STARSHIPS, NPC_STATIONS } from '../../data/hub';
+import { TABLES, type Table } from '../../data/tables';
+import { colors } from '../../theme';
 import {
   HUB_CORE_FUNCTIONS,
   HUB_MAX_INTEGRITY,
   STARTING_HUBS,
   MAX_VOID_POINTS,
   LIFE_SUPPORT_STEPS,
-} from '../types';
-import { rollDie } from '../utils/dice';
+} from '../../types';
+import { rollDie } from '../../utils/dice';
+import { styles } from './styles';
 
 type Category =
   | 'TABLES'
@@ -392,125 +393,3 @@ export default function TablesScreen() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    color: colors.yellow,
-    fontSize: 20,
-    fontWeight: '900',
-    letterSpacing: 2,
-    marginBottom: spacing.md,
-  },
-  chips: { flexDirection: 'row', flexWrap: 'wrap' },
-  diceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  dieBox: {
-    width: 62,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    marginRight: spacing.sm,
-  },
-  dieValue: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  dieLabel: { color: colors.textFaint, fontSize: font.tiny, letterSpacing: 1 },
-  diceButtonWrap: { flex: 1, alignItems: 'flex-end' },
-  diceButton: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    borderWidth: 1,
-    borderColor: colors.yellow,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    overflow: 'hidden',
-  },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  tableHead: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tableTitle: {
-    color: colors.text,
-    fontSize: font.heading,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  tableDie: { color: colors.yellow, fontSize: font.small, fontWeight: '800' },
-  entries: { marginTop: spacing.md },
-  entry: { flexDirection: 'row', marginBottom: spacing.sm },
-  entryRoll: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '800',
-    width: 26,
-  },
-  entryText: {
-    color: colors.text,
-    fontSize: font.small,
-    lineHeight: 19,
-    flex: 1,
-  },
-  hint: { color: colors.textFaint, fontSize: font.tiny, marginTop: spacing.xs },
-  body: {
-    color: colors.textDim,
-    fontSize: font.small,
-    lineHeight: 19,
-    marginTop: 2,
-  },
-  benefit: {
-    borderLeftWidth: 2,
-    borderLeftColor: colors.yellow,
-    paddingLeft: spacing.md,
-    marginTop: spacing.md,
-  },
-  benefitName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  subLabel: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    marginTop: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  formulaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.xs,
-  },
-  formulaLabel: { color: colors.textDim, fontSize: font.small, flex: 1 },
-  formulaValue: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '700',
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  searchWrap: {paddingHorizontal: spacing.lg},
-  bullet: {
-    color: colors.textDim,
-    fontSize: font.small,
-    lineHeight: 19,
-    marginBottom: spacing.xs,
-  },
-});

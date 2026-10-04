@@ -4,14 +4,13 @@ import {
   Pressable,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
-import { TablePicker } from '../components/TablePicker';
+import { TablePicker } from '../../components/TablePicker';
 import {
   Button,
   Card,
@@ -24,7 +23,7 @@ import {
   SectionTitle,
   Snackbar,
   Tag,
-} from '../components/ui';
+} from '../../components/ui';
 import {
   ENERGY_SYSTEMS,
   HULLS,
@@ -32,9 +31,9 @@ import {
   HUB_MODULE_GROUPS,
   HUB_QUIRKS,
   hubBackstories,
-} from '../data/hub';
-import { newId, useCharacterStore } from '../store/characterStore';
-import { colors, font, radius, shadow, spacing } from '../theme';
+} from '../../data/hub';
+import { newId, useCharacterStore } from '../../store/characterStore';
+import { colors } from '../../theme';
 import {
   HUB_CORE_FUNCTIONS,
   HUB_MAX_INTEGRITY,
@@ -44,11 +43,12 @@ import {
   type Hub,
   type HubDraft,
   type HubType,
-} from '../types';
-import type { TableEntry } from '../data/tables';
-import { rollDie } from '../utils/dice';
-import { hubToText } from '../utils/sheetText';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../types';
+import type { TableEntry } from '../../data/tables';
+import { rollDie } from '../../utils/dice';
+import { hubToText } from '../../utils/sheetText';
+import type { RootStackParamList } from '../../navigation/types';
+import { styles } from './styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Hub'>;
 
@@ -1021,230 +1021,3 @@ function HubStat({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  stepBar: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.sm,
-  },
-  stepDot: {
-    flex: 1,
-    height: 3,
-    backgroundColor: colors.surfaceAlt,
-    marginRight: 4,
-    borderRadius: 2,
-  },
-  stepDotActive: { backgroundColor: colors.yellow },
-  typeRow: { flexDirection: 'row' },
-  typeCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginRight: spacing.sm,
-    backgroundColor: colors.surfaceAlt,
-  },
-  typeCardActive: {
-    borderColor: colors.yellow,
-    backgroundColor: colors.surfaceHi,
-  },
-  typeIcon: { fontSize: 24, marginBottom: spacing.xs },
-  typeName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  typeMeta: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    lineHeight: 15,
-    marginTop: spacing.xs,
-  },
-  row: { flexDirection: 'row' },
-  half: { flex: 1, marginRight: spacing.sm },
-  presetRow: { flexDirection: 'row', marginBottom: spacing.md },
-  presetButton: { flex: 1, marginRight: spacing.sm },
-  help: {
-    color: colors.textFaint,
-    fontSize: font.small,
-    lineHeight: 17,
-    marginTop: spacing.sm,
-  },
-  warning: {
-    color: colors.red,
-    fontSize: font.small,
-    lineHeight: 17,
-    marginBottom: spacing.md,
-  },
-  footerNote: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 1,
-    textAlign: 'center',
-    marginTop: spacing.lg,
-  },
-  footer: {
-    flexDirection: 'row',
-    padding: spacing.lg,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.bg,
-  },
-  footerButton: { flex: 1, marginRight: spacing.sm },
-  hubHead: { flexDirection: 'row', alignItems: 'center' },
-  hubIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  hubIconText: { fontSize: 24 },
-  hubName: { color: colors.yellow, fontSize: font.heading, fontWeight: '800' },
-  hubMeta: { color: colors.textFaint, fontSize: font.tiny, marginTop: 2 },
-  headButton: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  headActions: { flexDirection: 'row', alignItems: 'center' },
-  headIconButton: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginRight: spacing.xs,
-  },
-  headIconText: { color: colors.textDim, fontSize: font.body },
-  spacer: { height: spacing.md },
-  headButtonText: {
-    color: colors.textDim,
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  statGrid: { flexDirection: 'row', marginTop: spacing.lg },
-  stat: { flex: 1, alignItems: 'center' },
-  statValue: { color: colors.text, fontSize: font.heading, fontWeight: '800' },
-  statLabel: {
-    color: colors.textFaint,
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginTop: 2,
-  },
-  powerBar: {
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-    backgroundColor: colors.surfaceAlt,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-  },
-  powerFill: { height: '100%' },
-  subLabel: {
-    color: colors.yellow,
-    fontSize: font.tiny,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
-  },
-  moduleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    marginBottom: spacing.sm,
-    backgroundColor: colors.surfaceAlt,
-  },
-  moduleName: { color: colors.text, fontSize: font.small, fontWeight: '700' },
-  moduleRemove: { paddingHorizontal: spacing.sm },
-  moduleRemoveText: { color: colors.textFaint, fontSize: font.small },
-  moduleTabs: { flexDirection: 'row', marginBottom: spacing.md },
-  moduleTab: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.sm,
-    paddingVertical: spacing.xs,
-    marginRight: spacing.xs,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moduleTabActive: {
-    borderColor: colors.yellow,
-    backgroundColor: colors.surfaceHi,
-  },
-  moduleTabText: {
-    color: colors.textFaint,
-    fontSize: 10,
-    fontWeight: '800',
-    textAlign: 'center',
-  },
-  moduleTabTextActive: { color: colors.yellow },
-  moduleCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    ...shadow.card,
-  },
-  moduleCardWarn: { opacity: 0.55 },
-  moduleCardHead: { flexDirection: 'row', alignItems: 'center' },
-  moduleCardName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    flex: 1,
-  },
-  moduleCardDesc: {
-    color: colors.textFaint,
-    fontSize: font.small,
-    lineHeight: 16,
-    marginTop: spacing.xs,
-  },
-  moduleCardHint: {
-    color: colors.textDim,
-    fontSize: 10,
-    letterSpacing: 0.6,
-    marginTop: spacing.sm,
-    fontWeight: '700',
-  },
-  storyLabel: {
-    color: colors.yellow,
-    fontSize: font.tiny,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: spacing.xs,
-  },
-  storyText: {
-    color: colors.text,
-    fontSize: font.small,
-    lineHeight: 18,
-    marginBottom: spacing.md,
-  },
-  coreRow: { marginBottom: spacing.md },
-  coreName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    marginBottom: 2,
-  },
-  coreDesc: { color: colors.textFaint, fontSize: font.small, lineHeight: 17 },
-});

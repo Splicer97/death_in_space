@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -23,35 +22,33 @@ import {
   NumberStepper,
   Screen,
   SectionTitle,
-} from '../components/ui';
-import { Track } from '../components/Track';
-import { TablePicker } from '../components/TablePicker';
-import { ARMOR_PRESETS } from '../data/armor';
-import { findOrigin, ORIGINS } from '../data/origins';
-import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../data/mutations';
+} from '../../components/ui';
+import { Track } from '../../components/Track';
+import { TablePicker } from '../../components/TablePicker';
+import { ARMOR_PRESETS } from '../../data/armor';
+import { findOrigin, ORIGINS } from '../../data/origins';
+import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../../data/mutations';
 import {
   BACKGROUNDS,
   DRIVES,
   LOOKS,
   PAST_ALLEGIANCES,
   TRAITS,
-} from '../data/tables';
-import type { TableEntry } from '../data/tables';
+} from '../../data/tables';
+import type { TableEntry } from '../../data/tables';
 import {
   emptyCharacter,
   newId,
   selectCharacter,
   useCharacterStore,
-} from '../store/characterStore';
+} from '../../store/characterStore';
 import {
   ABILITY_COLORS,
   ABILITY_LABELS,
   ABILITY_NAMES,
   colors,
-  font,
-  radius,
   spacing,
-} from '../theme';
+} from '../../theme';
 import {
   defenseRating,
   availableSlots,
@@ -63,10 +60,11 @@ import {
   MAX_WEAPON_CONDITION,
   type Character,
   type Item,
-} from '../types';
-import { rollDie } from '../utils/dice';
-import { characterToText } from '../utils/sheetText';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../types';
+import { rollDie } from '../../utils/dice';
+import { characterToText } from '../../utils/sheetText';
+import type { RootStackParamList } from '../../navigation/types';
+import { styles } from './styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Character'>;
 
@@ -1543,389 +1541,3 @@ function HeadStat({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  missing: { flex: 1, justifyContent: 'center', padding: spacing.xl },
-  missingText: {
-    color: colors.text,
-    marginBottom: spacing.lg,
-    textAlign: 'center',
-  },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTop: { flexDirection: 'row', alignItems: 'center' },
-  portraitFrame: {
-    width: 50,
-    height: 50,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: spacing.md,
-  },
-  portrait: { fontSize: 26 },
-  headerInfo: { flex: 1 },
-  name: { color: colors.text, fontSize: 20, fontWeight: '800' },
-  headerSub: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  rollButton: {
-    borderWidth: 1,
-    borderColor: colors.yellow,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-  },
-  rollButtonText: {
-    color: colors.yellow,
-    fontSize: font.body,
-    fontWeight: '800',
-  },
-  headerButtons: {flexDirection: 'row', alignItems: 'center'},
-  spacer: {height: spacing.sm},
-  shareButton: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs,
-    marginRight: spacing.sm,
-  },
-  shareButtonText: {color: colors.textDim, fontSize: font.body},
-  headerStats: {
-    flexDirection: 'row',
-    marginTop: spacing.md,
-    marginBottom: spacing.md,
-  },
-  headStat: { flex: 1, alignItems: 'center' },
-  headStatValue: { fontSize: font.heading, fontWeight: '800' },
-  headStatLabel: {
-    color: colors.textFaint,
-    fontSize: 9,
-    letterSpacing: 0.8,
-    marginTop: 1,
-  },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    alignItems: 'center',
-  },
-  tabActive: { borderBottomColor: colors.yellow },
-  tabText: {
-    color: colors.textFaint,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  tabTextActive: { color: colors.yellow },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  row: { flexDirection: 'row', alignItems: 'flex-end', flexWrap: 'wrap' },
-  smallButton: { width: 56, marginRight: spacing.sm },
-  wideButton: { flex: 1, marginRight: spacing.sm },
-  subLabel: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    marginBottom: spacing.xs,
-    marginTop: spacing.sm,
-  },
-  body: { color: colors.text, fontSize: font.body, fontWeight: '700' },
-  dim: {
-    color: colors.textDim,
-    fontSize: font.small,
-    lineHeight: 18,
-    marginTop: 2,
-  },
-  abilityBox: {
-    flex: 1,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing.sm,
-    alignItems: 'center',
-    marginRight: spacing.sm,
-  },
-  abilityLabel: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  abilityValue: { color: colors.yellow, fontSize: 26, fontWeight: '900' },
-  abilityControls: { flexDirection: 'row', marginTop: spacing.xs },
-  abilityButton: {
-    width: 28,
-    height: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginHorizontal: 3,
-  },
-  abilitySign: { color: colors.text, fontSize: 16, fontWeight: '800' },
-  abilityName: {
-    color: colors.textFaint,
-    fontSize: 8,
-    letterSpacing: 0.5,
-    marginTop: spacing.xs,
-  },
-  benefit: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    marginTop: spacing.sm,
-  },
-  benefitActive: { borderColor: colors.yellow },
-  benefitName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: 2,
-  },
-  benefitNameActive: { color: colors.yellow },
-  listRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  listText: {
-    color: colors.text,
-    fontSize: font.small,
-    lineHeight: 18,
-    flex: 1,
-  },
-  listRemove: {
-    color: colors.textFaint,
-    fontSize: font.body,
-    paddingHorizontal: spacing.sm,
-  },
-  addRow: { flexDirection: 'row', alignItems: 'center', marginTop: spacing.sm },
-  addButton: { width: 48, marginLeft: spacing.sm },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  itemBlock: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  itemWeight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.xs,
-  },
-  selectRow: {
-    alignSelf: 'flex-start',
-    marginTop: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  itemWeightLabel: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    marginRight: spacing.md,
-  },
-  weightButton: {
-    width: 30,
-    height: 26,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  weightSign: { color: colors.text, fontSize: 16, fontWeight: '800' },
-  itemWeightValue: {
-    color: colors.yellow,
-    fontSize: font.body,
-    fontWeight: '800',
-    width: 34,
-    textAlign: 'center',
-  },
-  itemWeightHint: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    marginLeft: spacing.xs,
-  },
-  smallItemsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
-  smallItemCell: {
-    flexDirection: 'column',
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    marginRight: spacing.sm,
-    marginBottom: spacing.sm,
-    maxWidth: '100%',
-  },
-  smallItemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  smallItemInput: {
-    color: colors.text,
-    fontSize: font.small,
-    flexShrink: 1,
-    minWidth: 60,
-    paddingHorizontal: spacing.xs,
-  },
-  smallItemCount: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '800',
-    width: 28,
-    textAlign: 'center',
-  },
-  smallItemStepper: {
-    width: 26,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginHorizontal: 2,
-  },
-  smallItemCountSign: { color: colors.text, fontSize: 14, fontWeight: '800' },
-  smallItemRemove: {
-    color: colors.textFaint,
-    fontSize: font.body,
-    paddingLeft: spacing.sm,
-    paddingRight: spacing.xs,
-  },
-  itemInput: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.text,
-    fontSize: font.body,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 2,
-  },
-  conditionBox: { flexDirection: 'row', marginLeft: spacing.sm },
-  conditionCell: {
-    width: 12,
-    height: 24,
-    borderRadius: 2,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginHorizontal: 1,
-  },
-  conditionCellOn: { backgroundColor: colors.green, borderColor: colors.green },
-  conditionToggle: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs + 2,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginRight: spacing.xs,
-  },
-  conditionToggleOn: {
-    borderColor: colors.green,
-    backgroundColor: colors.surfaceAlt,
-  },
-  conditionToggleText: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  removeButton: { paddingHorizontal: spacing.sm },
-  weaponBox: { marginBottom: spacing.lg },
-  weaponHalf: { flex: 1, marginRight: spacing.sm },
-  warning: {
-    color: colors.red,
-    fontSize: font.small,
-    marginBottom: spacing.sm,
-  },
-  tall: { marginBottom: 0 },
-  modalBackdrop: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.overlay,
-    justifyContent: 'flex-end',
-  },
-  modal: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: radius.lg,
-    borderTopRightRadius: radius.lg,
-    padding: spacing.lg,
-    maxHeight: '85%',
-  },
-  modalTitle: {
-    color: colors.yellow,
-    fontSize: font.heading,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  modalSub: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    marginTop: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  mutationRow: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  mutationRowActive: { borderColor: colors.yellow },
-  mutationRoll: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '800',
-    width: 24,
-  },
-  mutationName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: 2,
-  },
-});

@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -19,10 +18,10 @@ import {
   Screen,
   SectionTitle,
   Tag,
-} from '../components/ui';
-import { TablePicker } from '../components/TablePicker';
-import { Track } from '../components/Track';
-import { ORIGINS } from '../data/origins';
+} from '../../components/ui';
+import { TablePicker } from '../../components/TablePicker';
+import { Track } from '../../components/Track';
+import { ORIGINS } from '../../data/origins';
 import {
   BACKGROUNDS,
   DRIVES,
@@ -33,15 +32,12 @@ import {
   TRAITS,
   TRINKETS,
   type TableEntry,
-} from '../data/tables';
+} from '../../data/tables';
 import {
   ABILITY_LABELS,
   ABILITY_NAMES,
   colors,
-  font,
-  radius,
-  spacing,
-} from '../theme';
+} from '../../theme';
 import {
   abilitySum,
   itemSlots,
@@ -50,11 +46,12 @@ import {
   type Abilities,
   type AbilityKey,
   type CharacterDraft,
-} from '../types';
-import { ABILITY_KEYS } from '../types';
-import { emptyCharacter, useCharacterStore } from '../store/characterStore';
-import { rollAbilityValue, rollDie, sum, rollDice } from '../utils/dice';
-import type { RootStackParamList } from '../navigation/types';
+} from '../../types';
+import { ABILITY_KEYS } from '../../types';
+import { emptyCharacter, useCharacterStore } from '../../store/characterStore';
+import { rollAbilityValue, rollDie, sum, rollDice } from '../../utils/dice';
+import type { RootStackParamList } from '../../navigation/types';
+import { styles } from './styles';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Create'>;
 
@@ -693,180 +690,3 @@ function RolledRow({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  stepBar: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  stepDot: {
-    flex: 1,
-    height: 4,
-    backgroundColor: colors.surfaceAlt,
-    marginRight: spacing.xs,
-    borderRadius: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepDotActive: { backgroundColor: colors.yellow },
-  stepNum: { display: 'none' },
-  stepNumActive: { display: 'none' },
-  stepTitle: {
-    color: colors.text,
-    fontSize: font.heading,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  content: { padding: spacing.lg, paddingBottom: spacing.xxl },
-  spacer: { height: spacing.md },
-  help: { color: colors.textDim, fontSize: font.small, lineHeight: 18 },
-  bonusBanner: {
-    borderWidth: 1,
-    borderColor: colors.violet,
-    backgroundColor: 'rgba(155, 93, 229, 0.12)',
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  bonusBannerText: {
-    color: colors.text,
-    fontSize: font.small,
-    lineHeight: 18,
-  },
-  bonusBannerAccent: {
-    color: colors.violet,
-    fontWeight: '800',
-  },
-  sum: {
-    color: colors.yellow,
-    fontSize: font.body,
-    fontWeight: '800',
-    letterSpacing: 1,
-    marginBottom: spacing.md,
-  },
-  row: { flexDirection: 'row', flexWrap: 'wrap' },
-  row2: { flexDirection: 'row' },
-  rowBetween: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  half: { flex: 1, marginRight: spacing.sm },
-  label: {
-    color: colors.textDim,
-    fontSize: font.tiny,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    marginBottom: spacing.xs,
-  },
-  originCard: { borderColor: colors.border },
-  originCardActive: { borderColor: colors.yellow },
-  originName: {
-    color: colors.text,
-    fontSize: font.heading,
-    fontWeight: '800',
-    letterSpacing: 1.5,
-  },
-  originNameActive: { color: colors.yellow },
-  originDesc: {
-    color: colors.textDim,
-    fontSize: font.small,
-    lineHeight: 18,
-    marginTop: spacing.xs,
-    marginBottom: spacing.md,
-  },
-  benefitsLabel: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 1.2,
-    marginBottom: spacing.sm,
-  },
-  benefit: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  benefitActive: {
-    borderColor: colors.yellow,
-    backgroundColor: colors.surfaceAlt,
-  },
-  benefitName: {
-    color: colors.text,
-    fontSize: font.small,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  benefitNameActive: { color: colors.yellow },
-  benefitDesc: {
-    color: colors.textDim,
-    fontSize: font.small,
-    lineHeight: 17,
-    marginTop: 2,
-  },
-  rolled: { marginBottom: spacing.lg },
-  rolledInput: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    color: colors.text,
-    fontSize: font.body,
-    lineHeight: 19,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  rolledInputMultiline: { minHeight: 76, textAlignVertical: 'top' },
-  rolledActions: { flexDirection: 'row', flexWrap: 'wrap' },
-  optionDesc: {
-    color: colors.textFaint,
-    fontSize: font.small,
-    lineHeight: 16,
-    marginTop: spacing.xs,
-  },
-  option: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  optionActive: {
-    borderColor: colors.yellow,
-    backgroundColor: colors.surfaceAlt,
-  },
-  optionRoll: {
-    color: colors.yellow,
-    fontSize: font.small,
-    fontWeight: '800',
-    width: 22,
-  },
-  optionText: {
-    color: colors.text,
-    fontSize: font.small,
-    lineHeight: 18,
-    flex: 1,
-  },
-  footer: {
-    color: colors.textFaint,
-    fontSize: font.tiny,
-    letterSpacing: 1,
-    textAlign: 'center',
-    marginVertical: spacing.lg,
-  },
-  footerBar: {
-    flexDirection: 'row',
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    padding: spacing.md,
-    backgroundColor: colors.surface,
-  },
-  footerButton: { flex: 1, marginRight: spacing.sm },
-});
