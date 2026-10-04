@@ -240,19 +240,30 @@ export const styles = StyleSheet.create({
   smallItemsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
   smallItemCell: {
     flexDirection: 'column',
+    width: '100%',
     backgroundColor: colors.surfaceAlt,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.border,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    marginRight: spacing.sm,
     marginBottom: spacing.sm,
-    maxWidth: '100%',
   },
   smallItemRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  smallItemCountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+  },
+  smallItemCountLabel: {
+    color: colors.textFaint,
+    fontSize: font.tiny,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginRight: spacing.sm,
   },
   smallItemInput: {
     color: colors.text,

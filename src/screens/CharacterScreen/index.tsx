@@ -898,6 +898,22 @@ export default function CharacterScreen({ navigation, route }: Props) {
                         </Pressable>
                         <Pressable
                           accessibilityRole="button"
+                          accessibilityLabel={`Удалить: ${item.name}`}
+                          onPress={() =>
+                            set({
+                              smallItems: character.smallItems.filter(
+                                (_, itemIndex) => itemIndex !== index,
+                              ),
+                            })
+                          }
+                        >
+                          <Text style={styles.smallItemRemove}>✕</Text>
+                        </Pressable>
+                      </View>
+                      <View style={styles.smallItemCountRow}>
+                        <Text style={styles.smallItemCountLabel}>КОЛ-ВО</Text>
+                        <Pressable
+                          accessibilityRole="button"
                           accessibilityLabel={`Меньше: ${item.name}`}
                           onPress={() =>
                             set({
@@ -936,19 +952,6 @@ export default function CharacterScreen({ navigation, route }: Props) {
                           style={styles.smallItemStepper}
                         >
                           <Text style={styles.smallItemCountSign}>+</Text>
-                        </Pressable>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Удалить: ${item.name}`}
-                          onPress={() =>
-                            set({
-                              smallItems: character.smallItems.filter(
-                                (_, itemIndex) => itemIndex !== index,
-                              ),
-                            })
-                          }
-                        >
-                          <Text style={styles.smallItemRemove}>✕</Text>
                         </Pressable>
                       </View>
                       {item.condition != null && item.condition > 0 ? (
