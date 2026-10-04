@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import { TablePicker } from '../components/TablePicker';
 import {
@@ -246,9 +247,10 @@ export default function HubScreen({ navigation }: Props) {
     return (
       <Screen>
         <WizardHeader step={step} />
-        <ScrollView
+        <KeyboardAwareScrollView
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          bottomOffset={12}
         >
           {step === 0 ? (
             <>
@@ -516,7 +518,7 @@ export default function HubScreen({ navigation }: Props) {
               <Text style={styles.footerNote}>Это был последний шаг.</Text>
             </Card>
           ) : null}
-        </ScrollView>
+        </KeyboardAwareScrollView>
 
         <View style={styles.footer}>
           <Button
@@ -680,9 +682,10 @@ function HubSheet({
 
   return (
     <Screen>
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={12}
       >
         <Card>
           <View style={styles.hubHead}>
@@ -984,7 +987,7 @@ function HubSheet({
           />
           <Button title="УДАЛИТЬ ХАБ" variant="ghost" onPress={onReset} />
         </Card>
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       {picker ? (
         <TablePicker

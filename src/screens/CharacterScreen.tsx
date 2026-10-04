@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import KeyboardAwareScrollView from '../components/KeyboardAwareScrollView';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import {
   Button,

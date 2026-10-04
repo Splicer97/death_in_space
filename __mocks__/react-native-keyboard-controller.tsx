@@ -9,5 +9,5 @@ function KeyboardAwareScrollView(props: Record<string, unknown>) {
   return <View {...props} />;
 }
 
-export {KeyboardProvider};
+export {KeyboardProvider, KeyboardAwareScrollView};
 export default KeyboardAwareScrollView;

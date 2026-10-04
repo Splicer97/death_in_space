@@ -2,13 +2,13 @@ import React, { useCallback, useMemo, useState } from 'react';
 import {
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 import {
   Button,
@@ -177,9 +177,10 @@ export default function CreateScreen({ navigation }: Props) {
         {step + 1}. {STEPS[step]}
       </Text>
 
-      <ScrollView
+      <KeyboardAwareScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
+        bottomOffset={12}
       >
         {step === 0 ? (
           <>
@@ -601,7 +602,7 @@ export default function CreateScreen({ navigation }: Props) {
             </Text>
           </>
         ) : null}
-      </ScrollView>
+      </KeyboardAwareScrollView>
 
       <View style={styles.footerBar}>
         <Button
