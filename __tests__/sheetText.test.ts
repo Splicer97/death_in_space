@@ -72,7 +72,21 @@ describe('character sheet export', () => {
 
     expect(text).toContain('Дробовик — состояние 3');
     expect(text).toContain('Плазменный нож — состояние 2');
-    expect(text).toContain('Слоты предметов: 13/13');
+    expect(text).toContain('Слоты предметов: 4/13');
+  });
+
+  it('counts armor slots as occupied', () => {
+    const text = characterToText({
+      ...sampleCharacter(),
+      armor: {
+        type: 'Средняя: бронежилет',
+        protectsAgainst: 'Взрывов, дробовиков, мелкокалиберного оружия',
+        drBonus: 2,
+        slots: 3,
+      },
+    });
+
+    expect(text).toContain('Слоты предметов: 7/13');
   });
 
   it('lists weapon charges as current/maximum', () => {

@@ -1,14 +1,16 @@
 import {
   abilitySum,
-  availableSlots,
+  armorSlots,
   defenseRating,
   energyOverdrawn,
   energyUsed,
   itemSlots,
+  occupiedSlots,
   HUB_MAX_INTEGRITY,
   STARTING_HUBS,
   type Armor,
 } from '../src/types';
+import { emptyCharacter } from '../src/store/characterStore';
 
 describe('derived character values', () => {
   it('computes item slots as 12 + body', () => {
@@ -17,36 +19,39 @@ describe('derived character values', () => {
     expect(itemSlots(-3)).toBe(9);
   });
 
-  it('subtracts armor slots from the free item slots', () => {
-    const armor: Armor = {
-      type: 'Средний бронежилет (флак)',
-      protectsAgainst: 'колющее, пули',
+  it('reads armor slots with a zero fallback', () => {
+    expect(armorSlots(null)).toBe(0);
+    expect(
+      armorSlots({ type: 'Старый', protectsAgainst: 'колющее', drBonus: 1 }),
+    ).toBe(0);
+    expect(
+      armorSlots({
+        type: 'Средний',
+        protectsAgainst: 'пули',
+        drBonus: 2,
+        slots: 3,
+      }),
+    ).toBe(3);
+  });
+
+  it('counts items, weapons and armor as occupied slots', () => {
+    const character = emptyCharacter();
+    character.items = [
+      { id: 'i1', name: 'A', condition: 0, weight: 2 },
+      { id: 'i2', name: 'B', condition: 0, weight: 1 },
+    ];
+    character.weapons = [
+      { name: 'Пистолет', damage: '1d6', uses: 0, condition: 0, slots: 2 },
+      { name: 'Нож', damage: '1d4', uses: 0, condition: 0, slots: 1 },
+    ];
+    character.armor = {
+      type: 'Средний бронежилет',
+      protectsAgainst: 'пули',
       drBonus: 2,
       slots: 3,
     };
-    expect(availableSlots(0, null)).toBe(12);
-    expect(availableSlots(2, null)).toBe(14);
-    expect(availableSlots(0, armor)).toBe(9);
-    expect(availableSlots(2, armor)).toBe(11);
-  });
 
-  it('never reports negative free slots', () => {
-    const heavy: Armor = {
-      type: 'Бронекостюм',
-      protectsAgainst: 'всё',
-      drBonus: 4,
-      slots: 40,
-    };
-    expect(availableSlots(-3, heavy)).toBe(0);
-  });
-
-  it('treats missing armor slots as zero', () => {
-    const legacy: Armor = {
-      type: 'Старый бронежилет',
-      protectsAgainst: 'колющее',
-      drBonus: 1,
-    };
-    expect(availableSlots(0, legacy)).toBe(12);
+    expect(occupiedSlots(character)).toBe(9);
   });
 
   it('computes unarmored defense rating as 12 + dexterity', () => {

@@ -10,7 +10,7 @@ import {
   SectionTitle,
 } from '../../components/ui';
 import { Track } from '../../components/Track';
-import { DERIVED_HINTS, RULES } from '../../data/armor';
+import { ARMOR_PRESETS, DERIVED_HINTS, RULES } from '../../data/armor';
 import {
   ELECTRONICS,
   EQUIPMENT,
@@ -130,6 +130,9 @@ export default function TablesScreen() {
       matches(weapon.damage) ||
       (weapon.examples ?? []).some(example => matches(example)),
   );
+  const visibleArmor = ARMOR_PRESETS.filter(
+    item => matches(item.type) || matches(item.protectsAgainst),
+  );
   const visibleEquipment = EQUIPMENT.filter(item => matches(item.name));
   const visibleElectronics = ELECTRONICS.filter(item => matches(item.name));
   const nothingFound =
@@ -142,6 +145,7 @@ export default function TablesScreen() {
     visibleNpcStarships.length === 0 &&
     visibleNpcStations.length === 0 &&
     visibleWeapons.length === 0 &&
+    visibleArmor.length === 0 &&
     visibleEquipment.length === 0 &&
     visibleElectronics.length === 0;
 
@@ -418,6 +422,32 @@ export default function TablesScreen() {
                 перезарядки. Символ «*»: кубики урона можно разделить между
                 несколькими близкими целями. Слоты оружия учитываются в занятых
                 слотах листа.
+              </Text>
+            </Card>
+            <Card>
+              <SectionTitle
+                title="БРОНЯ"
+                subtitle="защищает от / слоты / бонус УЗ / цена"
+              />
+              {visibleArmor.map(item => (
+                <View key={item.type} style={styles.entry}>
+                  <Text style={styles.entryRoll}>•</Text>
+                  <View style={styles.flex}>
+                    <Text style={styles.benefitName}>{item.type}</Text>
+                    <Text style={styles.body}>
+                      {`Защищает: ${item.protectsAgainst} · Слоты ${
+                        item.slots
+                      } · Бонус УЗ ${
+                        item.drBonus > 0 ? `+${item.drBonus}` : '—'
+                      } · Цена ${item.price} гало`}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+              <Divider />
+              <Text style={styles.body}>
+                Броня защищает только от типа атак из столбца «Защищает». Слоты
+                брони вычитаются из 12+ТЕЛ слотов предметов.
               </Text>
             </Card>
             <Card>

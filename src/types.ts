@@ -247,12 +247,22 @@ export function weaponSlots(weapons: readonly Weapon[]): number {
   );
 }
 
-export function itemSlots(body: number): number {
-  return 12 + body;
+export function armorSlots(armor: Armor | null): number {
+  return Math.max(0, Math.round(armor?.slots ?? 0));
 }
 
-export function availableSlots(body: number, armor: Armor | null): number {
-  return Math.max(0, itemSlots(body) - (armor?.slots ?? 0));
+export function occupiedSlots(
+  character: Pick<Character, 'items' | 'weapons' | 'armor'>,
+): number {
+  return (
+    itemsUsed(character.items) +
+    weaponSlots(character.weapons) +
+    armorSlots(character.armor)
+  );
+}
+
+export function itemSlots(body: number): number {
+  return 12 + body;
 }
 
 export function defenseRating(dexterity: number, armor: Armor | null): number {

@@ -7,7 +7,8 @@ import { useCharacterStore } from '../../store/characterStore';
 import { ABILITY_COLORS, ABILITY_LABELS, colors } from '../../theme';
 import {
   defenseRating,
-  availableSlots,
+  itemSlots,
+  occupiedSlots,
   type AbilityKey,
   type Character,
 } from '../../types';
@@ -116,8 +117,7 @@ export default function RosterScreen({ navigation }: Props) {
 
           <View style={styles.slots}>
             <Text style={styles.slotsText}>
-              СЛОТЫ {item.items.length}/
-              {availableSlots(item.abilities.body, item.armor)}
+              СЛОТЫ {occupiedSlots(item)}/{itemSlots(item.abilities.body)}
             </Text>
           </View>
           {longPressId === item.id ? (

@@ -52,11 +52,9 @@ import {
 } from '../../theme';
 import {
   defenseRating,
-  availableSlots,
   itemSlots,
   itemWeight,
-  itemsUsed,
-  weaponSlots,
+  occupiedSlots,
   LIFE_SUPPORT_STEPS,
   MAX_VOID_POINTS,
   MAX_WEAPON_CONDITION,
@@ -125,9 +123,8 @@ export default function CharacterScreen({ navigation, route }: Props) {
   const armor = character.armor;
   const dr = defenseRating(character.abilities.dexterity, character.armor);
   const totalSlots = itemSlots(character.abilities.body);
-  const slots = availableSlots(character.abilities.body, character.armor);
-  const usedSlots = itemsUsed(character.items) + weaponSlots(character.weapons);
-  const overloaded = usedSlots > slots;
+  const usedSlots = occupiedSlots(character);
+  const overloaded = usedSlots > totalSlots;
 
   return (
     <Screen>
@@ -537,7 +534,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 value={String(dr)}
                 valueStyle={{ color: colors.yellow }}
               />
-              <KeyValue label="СЛОТЫ ПРЕДМЕТОВ" value={String(slots)} />
+              <KeyValue label="СЛОТЫ ПРЕДМЕТОВ" value={String(totalSlots)} />
               {armor && (armor.slots ?? 0) > 0 ? (
                 <KeyValue
                   label="БРОНЯ ЗАНИМАЕТ"
@@ -672,14 +669,14 @@ export default function CharacterScreen({ navigation, route }: Props) {
               <SectionTitle
                 index="3"
                 title="ЛИЧНОЕ ИМУЩЕСТВО"
-                subtitle={`${usedSlots}/${slots} слотов${
+                subtitle={`${usedSlots}/${totalSlots} слотов${
                   overloaded ? ' · ПЕРЕГРУЗ' : ''
                 }`}
               />
               {overloaded ? (
                 <Text style={styles.warning}>
-                  Занято {usedSlots} слотов при {slots} свободных — помеха на
-                  все действия.
+                  Занято {usedSlots} слотов при {totalSlots} доступных — помеха
+                  на все действия.
                 </Text>
               ) : null}
               {character.items.map(item => (

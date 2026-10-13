@@ -1,8 +1,8 @@
 import { findOrigin } from '../data/origins';
 import {
-  availableSlots,
   defenseRating,
   itemSlots,
+  occupiedSlots,
   type Character,
   type Hub,
   type InstalledModule,
@@ -70,10 +70,7 @@ export function characterToText(character: Character): string {
     section('СНАРЯЖЕНИЕ', [
       line(
         'Слоты предметов',
-        `${availableSlots(
-          character.abilities.body,
-          character.armor,
-        )}/${itemSlots(character.abilities.body)}`,
+        `${occupiedSlots(character)}/${itemSlots(character.abilities.body)}`,
       ),
       ...character.items.map(item => {
         const named = item.name.trim();
