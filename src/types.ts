@@ -42,7 +42,6 @@ export interface Weapon {
   uses: number;
   maxUses?: number;
   condition: number;
-  ammo?: string;
   slots?: number;
 }
 

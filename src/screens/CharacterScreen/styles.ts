@@ -339,7 +339,6 @@ export const styles = StyleSheet.create({
   },
   removeButton: { paddingHorizontal: spacing.sm },
   weaponBox: { marginBottom: spacing.lg },
-  weaponHalf: { flex: 1, marginRight: spacing.sm },
   warning: {
     color: colors.red,
     fontSize: font.small,

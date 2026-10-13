@@ -33,7 +33,7 @@ function weaponLine(label: string, weapon: Character['weapons'][0]): string {
   const body = `${weapon.name} (${weapon.damage}${
     weapon.slots != null ? `, ${weapon.slots} сл.` : ''
   })${charges}`;
-  return line(label, weapon.ammo ? `${body}, патроны: ${weapon.ammo}` : body);
+  return line(label, body);
 }
 
 export function characterToText(character: Character): string {

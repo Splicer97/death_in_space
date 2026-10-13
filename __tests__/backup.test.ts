@@ -45,7 +45,6 @@ function richCharacter(): Character {
         uses: 4,
         maxUses: 12,
         condition: 3,
-        ammo: '1d4×10 · 40/40',
         slots: 1,
       },
       {
@@ -54,7 +53,6 @@ function richCharacter(): Character {
         uses: 3,
         maxUses: 3,
         condition: 1,
-        ammo: '',
         slots: 1,
       },
     ],
@@ -238,7 +236,6 @@ describe('backup import', () => {
       { name: 'Ключ', count: 1 },
     ]);
     expect(character.weapons[0].name).toBe('Пистолет');
-    expect(character.weapons[0].ammo).toBe('');
     expect(character.armor).toBeNull();
 
     const hub = result.backup.hub as Hub;

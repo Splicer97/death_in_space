@@ -44,7 +44,6 @@ export function normalizeWeapons(
       uses,
       maxUses: count(recordItem?.maxUses, uses),
       condition: count(recordItem?.condition),
-      ammo: text(recordItem?.ammo),
       slots: count(recordItem?.slots, 1),
     };
   }) as [Weapon, Weapon];

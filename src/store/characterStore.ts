@@ -49,7 +49,6 @@ export function emptyCharacter(): CharacterDraft {
         uses: 0,
         maxUses: 0,
         condition: 0,
-        ammo: '',
         slots: 1,
       },
       {
@@ -58,7 +57,6 @@ export function emptyCharacter(): CharacterDraft {
         uses: 0,
         maxUses: 0,
         condition: 0,
-        ammo: '',
         slots: 1,
       },
     ],

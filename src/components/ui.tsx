@@ -208,6 +208,71 @@ export function NumberStepper({
   );
 }
 
+export function StepperInput({
+  label,
+  value,
+  onChange,
+  min = 0,
+  max,
+  placeholder,
+  hint,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max?: number;
+  placeholder?: string;
+  hint?: string;
+}) {
+  const clamp = (next: number) => {
+    let result = next;
+    if (min !== undefined) {
+      result = Math.max(min, result);
+    }
+    if (max !== undefined) {
+      result = Math.min(max, result);
+    }
+    return result;
+  };
+  return (
+    <View style={styles.stepperInputRow}>
+      <Text style={styles.stepperInputLabel}>{label}</Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Уменьшить ${label}`}
+        onPress={() => onChange(clamp(value - 1))}
+        style={({ pressed }) => [
+          styles.stepperInputButton,
+          pressed && styles.pressed,
+        ]}
+      >
+        <Text style={styles.stepperInputSign}>−</Text>
+      </Pressable>
+      <TextInput
+        value={value > 0 ? String(value) : ''}
+        onChangeText={raw => onChange(clamp(parseInt(raw, 10) || 0))}
+        keyboardType="number-pad"
+        placeholder={placeholder}
+        placeholderTextColor={colors.textFaint}
+        style={styles.stepperInputField}
+      />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`Увеличить ${label}`}
+        onPress={() => onChange(clamp(value + 1))}
+        style={({ pressed }) => [
+          styles.stepperInputButton,
+          pressed && styles.pressed,
+        ]}
+      >
+        <Text style={styles.stepperInputSign}>+</Text>
+      </Pressable>
+      {hint ? <Text style={styles.stepperInputHint}>{hint}</Text> : null}
+    </View>
+  );
+}
+
 export function Button({
   title,
   onPress,
@@ -552,6 +617,50 @@ export const styles = StyleSheet.create({
     textAlign: 'center',
   },
   stepperValueBig: { fontSize: 26 },
+  stepperInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  stepperInputLabel: {
+    flex: 1,
+    color: colors.textDim,
+    fontSize: font.tiny,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginRight: spacing.md,
+  },
+  stepperInputButton: {
+    width: 30,
+    height: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  stepperInputSign: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  stepperInputField: {
+    minWidth: 46,
+    marginHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.xs,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.border,
+    color: colors.yellow,
+    fontSize: font.body,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  stepperInputHint: {
+    color: colors.textDim,
+    fontSize: font.tiny,
+    marginLeft: spacing.xs,
+  },
   button: {
     paddingVertical: spacing.md + 2,
     paddingHorizontal: spacing.lg,

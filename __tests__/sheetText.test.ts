@@ -36,9 +36,8 @@ function sampleCharacter(): Character {
         uses: 3,
         maxUses: 12,
         condition: 2,
-        ammo: '1d4×10 · 40/40',
       },
-      { name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: '' },
+      { name: '', damage: '', uses: 0, maxUses: 0, condition: 0 },
     ],
   };
 }
@@ -81,7 +80,6 @@ describe('character sheet export', () => {
 
     expect(text).toContain('Импульсный пистолет (1d6)');
     expect(text).toContain('заряды 3/12');
-    expect(text).toContain('патроны: 1d4×10 · 40/40');
   });
 
   it('omits condition for items without tracking', () => {

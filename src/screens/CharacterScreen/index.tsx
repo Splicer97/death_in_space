@@ -22,6 +22,7 @@ import {
   NumberStepper,
   Screen,
   SectionTitle,
+  StepperInput,
 } from '../../components/ui';
 import { Track } from '../../components/Track';
 import { TablePicker } from '../../components/TablePicker';
@@ -1027,69 +1028,43 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       })
                     }
                   />
-                  <View style={styles.row}>
-                    <Field
-                      style={styles.weaponHalf}
-                      label="УРОН"
-                      value={weapon.damage}
-                      onChangeText={damage =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            damage,
-                          }),
-                        })
-                      }
-                      placeholder="1d6"
-                    />
-                    <Field
-                      style={styles.weaponHalf}
-                      label="В ОБОЙМЕ СЕЙЧАС"
-                      value={weapon.uses ? String(weapon.uses) : ''}
-                      onChangeText={value =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            uses: parseInt(value, 10) || 0,
-                          }),
-                        })
-                      }
-                      keyboardType="number-pad"
-                    />
-                  </View>
-                  <View style={styles.row}>
-                    <Field
-                      style={styles.weaponHalf}
-                      label="В ОБОЙМЕ МАКСИМУМ"
-                      value={
-                        weapon.maxUses != null && weapon.maxUses > 0
-                          ? String(weapon.maxUses)
-                          : ''
-                      }
-                      onChangeText={value =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            maxUses: parseInt(value, 10) || 0,
-                          }),
-                        })
-                      }
-                      keyboardType="number-pad"
-                    />
-                    <Field
-                      style={styles.weaponHalf}
-                      label="ВСЕГО ПАТРОН"
-                      value={weapon.ammo ?? ''}
-                      onChangeText={ammo =>
-                        set({
-                          weapons: replaceWeapon(character.weapons, index, {
-                            ...weapon,
-                            ammo,
-                          }),
-                        })
-                      }
-                    />
-                  </View>
+                  <Field
+                    label="УРОН"
+                    value={weapon.damage}
+                    onChangeText={damage =>
+                      set({
+                        weapons: replaceWeapon(character.weapons, index, {
+                          ...weapon,
+                          damage,
+                        }),
+                      })
+                    }
+                    placeholder="1d6"
+                  />
+                  <StepperInput
+                    label="В ОБОЙМЕ СЕЙЧАС"
+                    value={weapon.uses}
+                    onChange={uses =>
+                      set({
+                        weapons: replaceWeapon(character.weapons, index, {
+                          ...weapon,
+                          uses,
+                        }),
+                      })
+                    }
+                  />
+                  <StepperInput
+                    label="В ОБОЙМЕ МАКСИМУМ"
+                    value={weapon.maxUses ?? 0}
+                    onChange={maxUses =>
+                      set({
+                        weapons: replaceWeapon(character.weapons, index, {
+                          ...weapon,
+                          maxUses,
+                        }),
+                      })
+                    }
+                  />
                   <Text style={styles.subLabel}>СОСТОЯНИЕ</Text>
                   <Track
                     value={weapon.condition}

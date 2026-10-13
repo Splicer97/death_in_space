@@ -191,10 +191,8 @@ describe('storage migration', () => {
       uses: 4,
       maxUses: 4,
       condition: 2,
-      ammo: '',
       slots: 1,
     });
-    expect(character.weapons[1].ammo).toBe('');
     expect(JSON.parse(storage.getString('characters') as string).version).toBe(
       6,
     );
@@ -221,7 +219,7 @@ describe('storage migration', () => {
     ]);
   });
 
-  it('upgrades v2 string-list small items and fills weight and ammo', async () => {
+  it('upgrades v2 string-list small items and fills weight', async () => {
     storage.set(
       'characters',
       JSON.stringify({
@@ -249,7 +247,6 @@ describe('storage migration', () => {
     expect(character.smallItems).toEqual([{ name: 'Кружка', count: 1 }]);
     expect(itemWeight(character.items[0])).toBe(1);
     expect(character.items[0].weight).toBe(1);
-    expect(character.weapons[0].ammo).toBe('');
   });
 
   it('keeps v3 small items with their counts', async () => {
@@ -386,7 +383,6 @@ describe('storage migration', () => {
       uses: 3,
       maxUses: 8,
       condition: 2,
-      ammo: '',
       slots: 1,
     });
     expect(JSON.parse(storage.getString('characters') as string).version).toBe(
