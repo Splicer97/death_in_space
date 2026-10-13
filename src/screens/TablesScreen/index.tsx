@@ -11,6 +11,12 @@ import {
 } from '../../components/ui';
 import { Track } from '../../components/Track';
 import { DERIVED_HINTS, RULES } from '../../data/armor';
+import {
+  ELECTRONICS,
+  EQUIPMENT,
+  WEAPONS,
+  equipmentLine,
+} from '../../data/gear';
 import { ORIGINS } from '../../data/origins';
 import { COSMIC_MUTATIONS, VOID_CORRUPTIONS } from '../../data/mutations';
 import { HUB_TABLES, NPC_STARSHIPS, NPC_STATIONS } from '../../data/hub';
@@ -32,6 +38,7 @@ type Category =
   | 'MUTATIONS'
   | 'CORRUPTION'
   | 'HUBS'
+  | 'GEAR'
   | 'RULES';
 
 const CATEGORIES: Category[] = [
@@ -40,6 +47,7 @@ const CATEGORIES: Category[] = [
   'MUTATIONS',
   'CORRUPTION',
   'HUBS',
+  'GEAR',
   'RULES',
 ];
 
@@ -49,6 +57,7 @@ const CATEGORY_TITLES: Record<Category, string> = {
   MUTATIONS: 'МУТАЦИИ',
   CORRUPTION: 'ПОРЧА ПУСТОТЫ',
   HUBS: 'ХАБЫ',
+  GEAR: 'СНАРЯЖЕНИЕ',
   RULES: 'ПРАВИЛА',
 };
 
@@ -115,6 +124,11 @@ export default function TablesScreen() {
       matches(item.energy) ||
       matches(item.crew),
   );
+  const visibleWeapons = WEAPONS.filter(
+    weapon => matches(weapon.type) || matches(weapon.damage),
+  );
+  const visibleEquipment = EQUIPMENT.filter(item => matches(item.name));
+  const visibleElectronics = ELECTRONICS.filter(item => matches(item.name));
   const nothingFound =
     needle.length > 0 &&
     filteredTables.length === 0 &&
@@ -123,7 +137,10 @@ export default function TablesScreen() {
     visibleMutations.length === 0 &&
     visibleCorruptions.length === 0 &&
     visibleNpcStarships.length === 0 &&
-    visibleNpcStations.length === 0;
+    visibleNpcStations.length === 0 &&
+    visibleWeapons.length === 0 &&
+    visibleEquipment.length === 0 &&
+    visibleElectronics.length === 0;
 
   const toggle = (key: string) =>
     setOpen(current => ({ ...current, [key]: !current[key] }));
@@ -361,6 +378,66 @@ export default function TablesScreen() {
                       {`Экипаж ${item.crew} · ${item.energy}`}
                     </Text>
                     <Text style={styles.body}>{item.modules}</Text>
+                  </View>
+                </View>
+              ))}
+            </Card>
+          </>
+        ) : null}
+
+        {category === 'GEAR' ? (
+          <>
+            <Card>
+              <SectionTitle
+                title="ОРУЖИЕ"
+                subtitle="1d10 · состояние / слоты / применение / урон / цена"
+              />
+              {visibleWeapons.map(weapon => (
+                <View key={weapon.roll} style={styles.entry}>
+                  <Text style={styles.entryRoll}>{weapon.roll}</Text>
+                  <View style={styles.flex}>
+                    <Text style={styles.benefitName}>{weapon.type}</Text>
+                    <Text style={styles.body}>
+                      {`Сост ${weapon.condition} · Слоты ${weapon.slots} · Примен. ${weapon.uses} · Урон ${weapon.damage} · Цена ${weapon.price} гало`}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+              <Divider />
+              <Text style={styles.subLabel}>ПОЯСНЕНИЯ</Text>
+              <Text style={styles.body}>
+                «Применение» — число действий, которое оружие совершает без
+                перезарядки. Символ «*»: кубики урона можно разделить между
+                несколькими близкими целями. Слоты оружия учитываются в занятых
+                слотах листа.
+              </Text>
+            </Card>
+            <Card>
+              <SectionTitle
+                title="СНАРЯЖЕНИЕ"
+                subtitle="рынок · слоты и цена в гало"
+              />
+              {visibleEquipment.map(item => (
+                <View key={item.name} style={styles.entry}>
+                  <Text style={styles.entryRoll}>•</Text>
+                  <View style={styles.flex}>
+                    <Text style={styles.benefitName}>{item.name}</Text>
+                    <Text style={styles.body}>{equipmentLine(item)}</Text>
+                  </View>
+                </View>
+              ))}
+            </Card>
+            <Card>
+              <SectionTitle
+                title="ЭЛЕКТРОНИКА"
+                subtitle="рынок · состояние 1 при покупке"
+              />
+              {visibleElectronics.map(item => (
+                <View key={item.name} style={styles.entry}>
+                  <Text style={styles.entryRoll}>•</Text>
+                  <View style={styles.flex}>
+                    <Text style={styles.benefitName}>{item.name}</Text>
+                    <Text style={styles.body}>{equipmentLine(item)}</Text>
                   </View>
                 </View>
               ))}

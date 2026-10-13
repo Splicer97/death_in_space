@@ -30,7 +30,9 @@ function weaponLine(label: string, weapon: Character['weapons'][0]): string {
   const maxUses = weapon.maxUses ?? weapon.uses;
   const charges =
     weapon.uses > 0 || maxUses > 0 ? `, заряды ${weapon.uses}/${maxUses}` : '';
-  const body = `${weapon.name} (${weapon.damage})${charges}`;
+  const body = `${weapon.name} (${weapon.damage}${
+    weapon.slots != null ? `, ${weapon.slots} сл.` : ''
+  })${charges}`;
   return line(label, weapon.ammo ? `${body}, патроны: ${weapon.ammo}` : body);
 }
 

@@ -43,6 +43,7 @@ export interface Weapon {
   maxUses?: number;
   condition: number;
   ammo?: string;
+  slots?: number;
 }
 
 export interface Armor {
@@ -240,6 +241,13 @@ export function itemsUsed(items: Item[]): number {
   return items.reduce((sum, item) => sum + itemWeight(item), 0);
 }
 
+export function weaponSlots(weapons: readonly Weapon[]): number {
+  return weapons.reduce(
+    (sum, weapon) => sum + Math.max(0, Math.round(weapon.slots ?? 1)),
+    0,
+  );
+}
+
 export function itemSlots(body: number): number {
   return 12 + body;
 }
@@ -254,4 +262,16 @@ export function defenseRating(dexterity: number, armor: Armor | null): number {
 
 export function abilitySum(abilities: Abilities): number {
   return ABILITY_KEYS.reduce((sum, key) => sum + abilities[key], 0);
+}
+
+export const MAX_ORIGIN_BENEFITS = 2;
+
+export function toggleOriginBenefit(current: string[], name: string): string[] {
+  if (current.includes(name)) {
+    return current.filter(benefit => benefit !== name);
+  }
+  if (current.length >= MAX_ORIGIN_BENEFITS) {
+    return [...current.slice(1), name];
+  }
+  return [...current, name];
 }

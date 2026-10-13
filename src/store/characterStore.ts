@@ -43,8 +43,24 @@ export function emptyCharacter(): CharacterDraft {
     items: [],
     smallItems: [],
     weapons: [
-      { name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: '' },
-      { name: '', damage: '', uses: 0, maxUses: 0, condition: 0, ammo: '' },
+      {
+        name: '',
+        damage: '',
+        uses: 0,
+        maxUses: 0,
+        condition: 0,
+        ammo: '',
+        slots: 1,
+      },
+      {
+        name: '',
+        damage: '',
+        uses: 0,
+        maxUses: 0,
+        condition: 0,
+        ammo: '',
+        slots: 1,
+      },
     ],
     armor: null,
     holos: 0,
@@ -195,7 +211,7 @@ export function createCharacterStore() {
       }),
       {
         name: 'characters',
-        version: 5,
+        version: 6,
         storage: createJSONStorage(() => mmkvStorage),
         partialize: state => ({
           characters: state.characters,

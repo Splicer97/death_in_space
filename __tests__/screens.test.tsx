@@ -184,6 +184,7 @@ describe('character creation flow', () => {
     expect(state.characters[0].name).toBe('Вейн');
     expect(state.characters[0].origin).toBe('carbon');
     expect(state.characters[0].originBenefits).toEqual([
+      'ШЕСТЕРЁНКОГОЛОВЫЙ',
       'ИСКУССТВЕННЫЕ ЛЕГКИЕ',
     ]);
     expect(state.characters[0].holos).toBeGreaterThanOrEqual(3);

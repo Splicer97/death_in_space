@@ -148,8 +148,8 @@ export function NumberStepper({
   label,
   value,
   onChange,
-  min = -3,
-  max = 3,
+  min,
+  max,
   hint,
   big,
 }: {
@@ -161,7 +161,16 @@ export function NumberStepper({
   hint?: string;
   big?: boolean;
 }) {
-  const clamp = (next: number) => Math.max(min, Math.min(max, next));
+  const clamp = (next: number) => {
+    let result = next;
+    if (min !== undefined) {
+      result = Math.max(min, result);
+    }
+    if (max !== undefined) {
+      result = Math.min(max, result);
+    }
+    return result;
+  };
   return (
     <View style={styles.stepper}>
       <View style={styles.flex}>

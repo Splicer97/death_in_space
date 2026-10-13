@@ -70,7 +70,7 @@ npm test           # jest
 App.tsx                     точка входа
 src/
   components/               UI-примитивы (карточки, поля, степперы, треки)
-  data/                     игровые данные: origins, tables, mutations, armor, hub
+  data/                     игровые данные: origins, tables, mutations, armor, gear, hub
   navigation/               навигатор и типы маршрутов
   screens/                  каждый экран — папка с index.tsx и styles.ts:
     Roster/                 список персонажей

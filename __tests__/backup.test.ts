@@ -46,6 +46,7 @@ function richCharacter(): Character {
         maxUses: 12,
         condition: 3,
         ammo: '1d4×10 · 40/40',
+        slots: 1,
       },
       {
         name: 'Мачете',
@@ -54,6 +55,7 @@ function richCharacter(): Character {
         maxUses: 3,
         condition: 1,
         ammo: '',
+        slots: 1,
       },
     ],
     armor: {

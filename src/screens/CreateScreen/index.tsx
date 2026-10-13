@@ -33,6 +33,7 @@ import {
   itemSlots,
   LIFE_SUPPORT_STEPS,
   MAX_VOID_POINTS,
+  toggleOriginBenefit,
   type Abilities,
   type AbilityKey,
   type CharacterDraft,
@@ -175,7 +176,7 @@ export default function CreateScreen({ navigation }: Props) {
               <SectionTitle
                 index="ШАГ 1"
                 title="ГЕНЕРАЦИЯ СПОСОБНОСТЕЙ"
-                subtitle="2d4, первая минус вторая · диапазон −3…+3"
+                subtitle="2d4, первая минус вторая · ниже −3 и выше +3 — мутации и XP"
               />
               {ABILITY_KEYS.map(key => (
                 <NumberStepper
@@ -183,8 +184,6 @@ export default function CreateScreen({ navigation }: Props) {
                   label={`${ABILITY_LABELS[key]} — ${ABILITY_NAMES[key]}`}
                   value={draft.abilities[key]}
                   onChange={value => setAbility(key, value)}
-                  min={-3}
-                  max={3}
                 />
               ))}
               <Text style={styles.sum}>
@@ -244,17 +243,20 @@ export default function CreateScreen({ navigation }: Props) {
                     ) : null}
                   </Pressable>
                   <Text style={styles.originDesc}>{origin.description}</Text>
-                  <Text style={styles.benefitsLabel}>ОДНА ИЗ ДВУХ ВЫГОД:</Text>
+                  <Text style={styles.benefitsLabel}>ВЫГОДЫ (ДО ДВУХ):</Text>
                   {origin.benefits.map(benefit => {
                     const active = draft.originBenefits.includes(benefit.name);
                     return (
                       <Pressable
                         key={benefit.name}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected: active }}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: active }}
                         onPress={() =>
                           patch({
-                            originBenefits: active ? [] : [benefit.name],
+                            originBenefits: toggleOriginBenefit(
+                              draft.originBenefits,
+                              benefit.name,
+                            ),
                           })
                         }
                         style={[styles.benefit, active && styles.benefitActive]}
@@ -273,6 +275,10 @@ export default function CreateScreen({ navigation }: Props) {
                       </Pressable>
                     );
                   })}
+                  <Text style={styles.help}>
+                    Можно выбрать до двух выгод. Вторая обходится в 15 XP —
+                    потратьте их после создания персонажа.
+                  </Text>
                 </Card>
               );
             })}

@@ -147,7 +147,7 @@ describe('storage migration', () => {
     });
   });
 
-  it('converts a v1 snapshot into the v5 shape', async () => {
+  it('converts a v1 snapshot into the current shape', async () => {
     storage.set(
       'characters',
       JSON.stringify({
@@ -192,10 +192,11 @@ describe('storage migration', () => {
       maxUses: 4,
       condition: 2,
       ammo: '',
+      slots: 1,
     });
     expect(character.weapons[1].ammo).toBe('');
     expect(JSON.parse(storage.getString('characters') as string).version).toBe(
-      5,
+      6,
     );
   });
 
@@ -386,9 +387,10 @@ describe('storage migration', () => {
       maxUses: 8,
       condition: 2,
       ammo: '',
+      slots: 1,
     });
     expect(JSON.parse(storage.getString('characters') as string).version).toBe(
-      5,
+      6,
     );
   });
 });

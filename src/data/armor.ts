@@ -15,7 +15,7 @@ export const ARMOR_PRESETS: ArmorPreset[] = [
   {
     type: 'Средняя: бронежилет',
     drBonus: 2,
-    protectsAgainst: 'Всех снарядов',
+    protectsAgainst: 'Взрывов, дробовиков, мелкокалиберного оружия',
     slots: 3,
   },
   {
@@ -27,7 +27,7 @@ export const ARMOR_PRESETS: ArmorPreset[] = [
   {
     type: 'Полицейский щит',
     drBonus: 0,
-    protectsAgainst: 'Взрывов, дробовиков, мелкокалиберного оружия',
+    protectsAgainst: 'Всех снарядов',
     slots: 4,
   },
 ];

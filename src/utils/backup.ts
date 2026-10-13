@@ -117,6 +117,7 @@ function sanitizeWeapon(raw: Raw | undefined, fallback: Weapon): Weapon {
     maxUses: count(raw.maxUses, uses),
     condition: count(raw.condition),
     ammo: text(raw.ammo),
+    slots: count(raw.slots, 1),
   };
 }
 

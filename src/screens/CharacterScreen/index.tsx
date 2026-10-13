@@ -55,9 +55,11 @@ import {
   itemSlots,
   itemWeight,
   itemsUsed,
+  weaponSlots,
   LIFE_SUPPORT_STEPS,
   MAX_VOID_POINTS,
   MAX_WEAPON_CONDITION,
+  toggleOriginBenefit,
   type Character,
   type Item,
 } from '../../types';
@@ -123,7 +125,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
   const dr = defenseRating(character.abilities.dexterity, character.armor);
   const totalSlots = itemSlots(character.abilities.body);
   const slots = availableSlots(character.abilities.body, character.armor);
-  const usedSlots = itemsUsed(character.items);
+  const usedSlots = itemsUsed(character.items) + weaponSlots(character.weapons);
   const overloaded = usedSlots > slots;
 
   return (
@@ -250,7 +252,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                           set({
                             abilities: {
                               ...character.abilities,
-                              [key]: Math.max(-3, character.abilities[key] - 1),
+                              [key]: character.abilities[key] - 1,
                             },
                           })
                         }
@@ -264,7 +266,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
                           set({
                             abilities: {
                               ...character.abilities,
-                              [key]: Math.min(3, character.abilities[key] + 1),
+                              [key]: character.abilities[key] + 1,
                             },
                           })
                         }
@@ -409,8 +411,9 @@ export default function CharacterScreen({ navigation, route }: Props) {
                   <Text style={styles.body}>{origin.name}</Text>
                   <Text style={styles.dim}>{origin.description}</Text>
                   <Text style={[styles.subLabel, { marginTop: spacing.md }]}>
-                    ВЫГОДЫ
+                    ВЫГОДЫ (ДО ДВУХ)
                   </Text>
+                  <Hint text="Максимум две выгоды. Вторая обходится в 15 XP — тратите очки опыта в блоке «Совершенствование»." />
                   {origin.benefits.map(benefit => {
                     const active = character.originBenefits.includes(
                       benefit.name,
@@ -418,11 +421,14 @@ export default function CharacterScreen({ navigation, route }: Props) {
                     return (
                       <Pressable
                         key={benefit.name}
-                        accessibilityRole="radio"
-                        accessibilityState={{ selected: active }}
+                        accessibilityRole="checkbox"
+                        accessibilityState={{ checked: active }}
                         onPress={() =>
                           set({
-                            originBenefits: active ? [] : [benefit.name],
+                            originBenefits: toggleOriginBenefit(
+                              character.originBenefits,
+                              benefit.name,
+                            ),
                           })
                         }
                         style={[styles.benefit, active && styles.benefitActive]}
@@ -840,10 +846,7 @@ export default function CharacterScreen({ navigation, route }: Props) {
               ) : (
                 <View style={styles.smallItemsWrap}>
                   {character.smallItems.map((item, index) => (
-                    <View
-                      key={`${item.name}-${index}`}
-                      style={styles.smallItemCell}
-                    >
+                    <View key={index} style={styles.smallItemCell}>
                       <View style={styles.smallItemRow}>
                         <TextInput
                           value={item.name}
@@ -1101,6 +1104,45 @@ export default function CharacterScreen({ navigation, route }: Props) {
                       })
                     }
                   />
+                  <View style={styles.itemWeight}>
+                    <Text style={styles.itemWeightLabel}>СЛОТЫ</Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Уменьшить слоты"
+                      onPress={() =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            slots: Math.max(0, (weapon.slots ?? 1) - 1),
+                          }),
+                        })
+                      }
+                      style={styles.weightButton}
+                    >
+                      <Text style={styles.weightSign}>−</Text>
+                    </Pressable>
+                    <Text style={styles.itemWeightValue}>
+                      {weapon.slots ?? 1}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Увеличить слоты"
+                      onPress={() =>
+                        set({
+                          weapons: replaceWeapon(character.weapons, index, {
+                            ...weapon,
+                            slots: Math.min(12, (weapon.slots ?? 1) + 1),
+                          }),
+                        })
+                      }
+                      style={styles.weightButton}
+                    >
+                      <Text style={styles.weightSign}>+</Text>
+                    </Pressable>
+                    <Text style={styles.itemWeightHint}>
+                      слот{(weapon.slots ?? 1) === 1 ? '' : 'а'}
+                    </Text>
+                  </View>
                 </View>
               ))}
             </Card>
