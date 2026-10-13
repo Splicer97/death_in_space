@@ -87,6 +87,12 @@ export const styles = StyleSheet.create({
     paddingLeft: spacing.md,
     marginTop: spacing.md,
   },
+  examples: {
+    color: colors.textFaint,
+    fontSize: font.tiny,
+    lineHeight: 16,
+    marginTop: 2,
+  },
   benefitName: {
     color: colors.text,
     fontSize: font.small,

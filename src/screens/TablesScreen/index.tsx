@@ -125,7 +125,10 @@ export default function TablesScreen() {
       matches(item.crew),
   );
   const visibleWeapons = WEAPONS.filter(
-    weapon => matches(weapon.type) || matches(weapon.damage),
+    weapon =>
+      matches(weapon.type) ||
+      matches(weapon.damage) ||
+      (weapon.examples ?? []).some(example => matches(example)),
   );
   const visibleEquipment = EQUIPMENT.filter(item => matches(item.name));
   const visibleElectronics = ELECTRONICS.filter(item => matches(item.name));
@@ -400,6 +403,11 @@ export default function TablesScreen() {
                     <Text style={styles.body}>
                       {`Сост ${weapon.condition} · Слоты ${weapon.slots} · Примен. ${weapon.uses} · Урон ${weapon.damage} · Цена ${weapon.price} гало`}
                     </Text>
+                    {weapon.examples ? (
+                      <Text style={styles.examples}>
+                        Например: {weapon.examples.join(', ')}
+                      </Text>
+                    ) : null}
                   </View>
                 </View>
               ))}

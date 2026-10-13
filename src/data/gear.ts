@@ -6,6 +6,7 @@ export interface WeaponReference {
   uses: string;
   damage: string;
   price: string;
+  examples?: string[];
 }
 
 export interface EquipmentReference {
@@ -68,6 +69,11 @@ export const WEAPONS: WeaponReference[] = [
     uses: '10',
     damage: '1d10',
     price: '400',
+    examples: [
+      'проционная рейдорская винтовка',
+      'вакуумная винтовка булл-пап',
+      'дуговая винтовка',
+    ],
   },
   {
     roll: '7',
@@ -77,6 +83,11 @@ export const WEAPONS: WeaponReference[] = [
     uses: '4',
     damage: '1d12',
     price: '500',
+    examples: [
+      'термитный арбалет',
+      'снайперское ружьё с целеуказанием',
+      'серповидный отсекатель конечностей',
+    ],
   },
   {
     roll: '8',
@@ -86,6 +97,7 @@ export const WEAPONS: WeaponReference[] = [
     uses: '4',
     damage: '3d6',
     price: '800',
+    examples: ['Каацерская коаксиальная пушка', 'лёгкая автомобильная пушка'],
   },
   {
     roll: '9',
@@ -95,6 +107,11 @@ export const WEAPONS: WeaponReference[] = [
     uses: '—',
     damage: '2d6*',
     price: '50',
+    examples: [
+      'плерионная граната',
+      'зажигательный квазар',
+      'пылеочищающая граната',
+    ],
   },
   {
     roll: '10',
@@ -104,6 +121,7 @@ export const WEAPONS: WeaponReference[] = [
     uses: '3',
     damage: '3d6',
     price: '700',
+    examples: ['зажигательное устройство на жидком топливе («Панциморт»)'],
   },
 ];
 
