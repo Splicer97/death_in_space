@@ -50,6 +50,9 @@ export function createRollStore() {
 
 export const useRollStore = createRollStore();
 
+const EMPTY_HISTORY: RollResult[] = [];
+
 export function selectHistory(characterId: string) {
-  return (state: RollHistoryStore) => state.history[characterId] ?? [];
+  return (state: RollHistoryStore) =>
+    state.history[characterId] ?? EMPTY_HISTORY;
 }

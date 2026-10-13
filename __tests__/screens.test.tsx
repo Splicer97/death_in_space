@@ -7,6 +7,7 @@ import CreateScreen from '../src/screens/CreateScreen';
 import CharacterScreen from '../src/screens/CharacterScreen';
 import DataScreen from '../src/screens/DataScreen';
 import RosterScreen from '../src/screens/RosterScreen';
+import RollScreen from '../src/screens/RollScreen';
 import { emptyCharacter, useCharacterStore } from '../src/store/characterStore';
 import { TRAITS } from '../src/data/tables';
 import { VOID_CORRUPTIONS } from '../src/data/mutations';
@@ -18,6 +19,7 @@ type CreateProps = NativeStackScreenProps<RootStackParamList, 'Create'>;
 type CharacterProps = NativeStackScreenProps<RootStackParamList, 'Character'>;
 type RosterProps = NativeStackScreenProps<RootStackParamList, 'Roster'>;
 type DataProps = NativeStackScreenProps<RootStackParamList, 'Data'>;
+type RollProps = NativeStackScreenProps<RootStackParamList, 'Roll'>;
 
 type NavMock = {
   navigate: jest.Mock;
@@ -749,6 +751,43 @@ describe('character sheet', () => {
     });
 
     expect(JSON.stringify(tree.toJSON())).toContain('Персонаж не найден');
+  });
+});
+
+describe('dice roller screen', () => {
+  beforeEach(() => {
+    storage.clearAll();
+    act(() => {
+      useCharacterStore.setState({
+        characters: [],
+        activeId: null,
+        hub: null,
+        undoCharacter: null,
+        undoHub: null,
+      });
+    });
+  });
+
+  it('renders for a character without any roll history', () => {
+    let id = '';
+    act(() => {
+      id = useCharacterStore
+        .getState()
+        .addCharacter({ ...emptyCharacter(), name: 'Вейн' });
+    });
+
+    const { nav } = makeNav<RollProps['navigation']>();
+    let tree!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      tree = TestRenderer.create(
+        <RollScreen
+          navigation={nav}
+          route={{ key: 'k', name: 'Roll', params: { id } }}
+        />,
+      );
+    });
+
+    expect(collectText(tree.root)).toContain('БРОСОК');
   });
 });
 
