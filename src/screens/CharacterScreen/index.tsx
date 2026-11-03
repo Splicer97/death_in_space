@@ -1207,22 +1207,18 @@ export default function CharacterScreen({ navigation, route }: Props) {
                 title="ГАЛО И ДОЛГИ"
                 subtitle="Ремонт: 30 гало за состояние, 300 за корабль"
               />
-              <View style={styles.row}>
-                <NumberStepper
-                  label="ГАЛО"
-                  value={character.holos}
-                  onChange={holos => set({ holos: Math.max(0, holos) })}
-                  min={0}
-                  max={999999}
-                />
-                <NumberStepper
-                  label="ДОЛГ"
-                  value={character.debt}
-                  onChange={debt => set({ debt: Math.max(0, debt) })}
-                  min={0}
-                  max={999999}
-                />
-              </View>
+              <StepperInput
+                label="ГАЛО"
+                value={character.holos}
+                onChange={holos => set({ holos })}
+                max={999999}
+              />
+              <StepperInput
+                label="ДОЛГ"
+                value={character.debt}
+                onChange={debt => set({ debt })}
+                max={999999}
+              />
             </Card>
           </>
         ) : null}
